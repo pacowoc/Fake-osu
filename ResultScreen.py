@@ -16,9 +16,11 @@ def Render(target,name,diff,skin,mods,score,acc,rating_count,max_combo):
     Rank_texture["D"]=pygame.image.load("skins\\"+skin+"\\D.png").convert_alpha()
     Cursor=pygame.image.load("skins\\"+skin+"\\cursor.png").convert_alpha()
     Background=pygame.image.load("skins\\"+skin+"\\result_screen.png").convert_alpha()
+    FC=pygame.image.load("skins\\"+skin+"\\FC.png").convert_alpha()
+    do_FC=False
     map_combo=rating_count[0]+rating_count[1]+rating_count[2]+rating_count[3]
     if max_combo == map_combo:
-        print("FC")
+        do_FC=True
     if rating_count[0] == map_combo:
         rank = "SS"
     elif rating_count[0]>=0.9*map_combo and rating_count[3]==0 and rating_count[2]<=0.01*map_combo:
@@ -42,6 +44,8 @@ def Render(target,name,diff,skin,mods,score,acc,rating_count,max_combo):
                     sys.exit()
         curr_Objects = []
         curr_Objects.append((Background,(0,0)))
+        if do_FC:
+            curr_Objects.append((FC,(900,350)))
         curr_Objects.append((Rank_texture[rank],(576,47)))
 
         MComboText = Utilities.render_text(str(max_combo),FONT,45,WHITE)

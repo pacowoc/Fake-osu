@@ -31,8 +31,10 @@ def Play(target,map_,diff,skin,mods):
 
   Hitsound=pygame.mixer.Sound("skins\\"+skin+"\\hitsound.ogg")
   Bonus=pygame.mixer.Sound("skins\\"+skin+"\\spinnerbonus.wav")
-  Song=pygame.mixer.music.load('maps\\'+map_+'\\music.wav')
-
+  try:
+    Song=pygame.mixer.music.load("maps\\"+map_+"\\music.wav")
+  except:
+    Song=pygame.mixer.music.load("skins\\"+skin+"\\failsave.mp3")
   content = json.load(open('maps\\'+map_+"\\"+diff+'\\map.json'))
 
   AR = content["Info"]["AR"]
@@ -362,7 +364,7 @@ def Play(target,map_,diff,skin,mods):
         Combo=0
       if(Curr_time >= timechart[curr_notecount]+map_start+span+Hit and Object_list[curr_notecount]["Type"]=="G"):
         if spins>span*spinner_req/1000:
-          Score_cache.append((300,timechart[curr_notecount]+map_start+span,(515,335)))
+          Score_cache.append((300,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
           Acc_Score+=300
           Hitsound.play()
           Acc = Acc_Score/(timechart_C[0]+1)/300
@@ -370,7 +372,7 @@ def Play(target,map_,diff,skin,mods):
           rating_count[0]+=1
           Combo+=1
         elif spins>span*spinner_req/2000:
-          Score_cache.append((100,timechart[timechart_C[0]]+map_start+span,(515,335)))
+          Score_cache.append((100,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
           Acc_Score+=100
           Hitsound.play()
           Acc = Acc_Score/(timechart_C[0]+1)/300
@@ -378,7 +380,7 @@ def Play(target,map_,diff,skin,mods):
           rating_count[1]+=1
           Combo+=1
         elif spins>0:
-          Score_cache.append((50,timechart[timechart_C[0]]+map_start+span,(515,335)))
+          Score_cache.append((50,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
           Acc_Score+=50
           Hitsound.play()
           Acc = Acc_Score/(timechart_C[0]+1)/300
@@ -386,7 +388,7 @@ def Play(target,map_,diff,skin,mods):
           rating_count[2]+=1
           Combo+=1
         else:
-          Score_cache.append((0,timechart[timechart_C[0]]+map_start+span,(515,335)))
+          Score_cache.append((0,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
           Acc_Score+=0
           Hitsound.play()
           Acc = Acc_Score/(timechart_C[0]+1)/300
