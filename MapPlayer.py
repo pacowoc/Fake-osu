@@ -1,3 +1,4 @@
+from ast import For, If
 import pygame,sys
 from pygame.locals import *
 import json
@@ -9,6 +10,7 @@ import numpy
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
+GRAY = (120,120,120)
 TRANSPARENT = (0,0,0,0)
 FONT = "fonts\\Consolas.ttf"
 
@@ -29,12 +31,14 @@ def Play(target,map_,diff,skin,mods):
 
   Hitsound=pygame.mixer.Sound("skins\\"+skin+"\\hitsound.ogg")
   Bonus=pygame.mixer.Sound("skins\\"+skin+"\\spinnerbonus.wav")
+  Song=pygame.mixer.music.load('maps\\'+map_+'\\music.wav')
 
   content = json.load(open('maps\\'+map_+"\\"+diff+'\\map.json'))
 
   AR = content["Info"]["AR"]
   CS = content["Info"]["CS"]
   OD = content["Info"]["OD"]
+  Start_delay = content['Info']["Delay"]
   Object_list = content["Objects"]
 
   ##CALCULATIONS
@@ -115,15 +119,21 @@ def Play(target,map_,diff,skin,mods):
   Combo = 0
   Score_cache = []
   span=0
+  spins = 0
   spin_time = 0
   spin_number = 0
   rating_count = [0,0,0,0]
   max_combo = 0
   FPS_clock=pygame.time.Clock()
+  music = False
 
   ##MAIN LOOP
 
   while True:
+    Curr_time = pygame.time.get_ticks()
+    if music == False and Curr_time>=map_start+Start_delay:
+      pygame.mixer.music.play()
+      music=True
     FPS_clock.tick()
     FPS = FPS_clock.get_fps()
     curr_Objects = []
@@ -133,7 +143,7 @@ def Play(target,map_,diff,skin,mods):
         sys.exit()
       if event.type == KEYDOWN:
         if event.key == K_z or event.key == K_x:
-          clicktime = pygame.time.get_ticks()
+          clicktime = Curr_time
           for curr_notecount in timechart_C:
             if Object_list[curr_notecount]["Type"]=="C":
               Posx = Object_list[curr_notecount]["Posx"]
@@ -168,8 +178,7 @@ def Play(target,map_,diff,skin,mods):
                 Acc_Score += Hit_Value
                 Acc = Acc_Score/(timechart_C[0]+1)/300
                 Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)
-                timechart_P.append(timechart_C[0])
-                timechart_C.pop(0)
+                timechart_C.remove(curr_notecount)
                 break
             #Slider head
             if Object_list[curr_notecount]["Type"]=="S_head":
@@ -177,28 +186,26 @@ def Play(target,map_,diff,skin,mods):
               Posy = Object_list[curr_notecount]["Posy"]
               distance = math.sqrt((Mouse_pos[0]-Posx)**2+(Mouse_pos[1]-Posy)**2)
               if distance<R:
-                error = clicktime-timechart[timechart_C[0]]-map_start-Hit
+                error = clicktime-timechart[curr_notecount]-map_start-Hit
                 print(error)
                 error = abs(error)
-                if error<=200:
+                if error<=W50:
                   Score_cache.append((300,clicktime,Utilities.center(Posx,Posy,50,30)))
                   Acc_Score += 300
                   Acc = Acc_Score*(timechart_C[0]+1)/300
                   rating_count[0]+=1
                   Hitsound.play()
                   Combo+=1
-                  timechart_P.append(timechart_C[0])
-                  timechart_C.pop(0)
+                  timechart_C.remove(curr_notecount)
                   Hit_Value = 300
                 else:
                   Score_cache.append((0,clicktime,Utilities.center(Posx,Posy,50,30)))
                   Combo=0
                   rating_count[3]+=1
-                  for i in range(2):
-                    timechart_P.append(timechart_C[0])
-                    timechart_C.pop(0)
+                  timechart_C.remove(curr_notecount)
+                  timechart_C.remove(curr_notecount+1)
                   Hit_Value = 0
-                Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)
+                Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)   
                 break
 
     #Hold cycle
@@ -210,19 +217,18 @@ def Play(target,map_,diff,skin,mods):
           Span = Object_list[curr_notecount]["Span"]
           nodes = numpy.asfortranarray([Posx,Posy])
           main_curve = bezier.Curve(nodes, degree=len(Posx)-1)
-          if 200<pygame.time.get_ticks()-timechart[curr_notecount]-Hit-map_start<Span-200:
-            SliderballX = main_curve.evaluate((pygame.time.get_ticks()-Hit-timechart[curr_notecount]-map_start)/Span).tolist()[0][0]
-            SliderballY = main_curve.evaluate((pygame.time.get_ticks()-Hit-timechart[curr_notecount]-map_start)/Span).tolist()[1][0]
+          if W50<Curr_time-timechart[curr_notecount]-Hit-map_start<Span-W50:
+            SliderballX = main_curve.evaluate((Curr_time-Hit-timechart[curr_notecount]-map_start)/Span).tolist()[0][0]
+            SliderballY = main_curve.evaluate((Curr_time-Hit-timechart[curr_notecount]-map_start)/Span).tolist()[1][0]
             distance = math.sqrt((Mouse_pos[0]-SliderballX)**2+(Mouse_pos[1]-SliderballY)**2)
             if distance>2.5*R:
               #Slider break
               Acc_Score+=100
               rating_count[1]+=1
-              Score_cache.append((100,pygame.time.get_ticks(),Utilities.center(SliderballX,SliderballY,50,30)))
+              Score_cache.append((100,Curr_time,Utilities.center(SliderballX,SliderballY,50,30)))
               Combo=0
               Acc = Acc_Score/(timechart_C[0]+1)/300
-              timechart_P.append(timechart_C[0])
-              timechart_C.pop(0)
+              timechart_C.remove(curr_notecount)
           else:
             Acc = Acc_Score/(timechart_C[0]+1)/300
         if Object_list[curr_notecount]["Type"] == "G":
@@ -245,71 +251,68 @@ def Play(target,map_,diff,skin,mods):
 
           if math.ceil(spins-span*spinner_req/1000)*1000>0:
             spin_number = math.ceil(spins-span*spinner_req/1000)*1000
-            spin_time = pygame.time.get_ticks()
+            spin_time = Curr_time
     if pygame.key.get_pressed()[K_z]==False and pygame.key.get_pressed()[K_x]==False:
 
       for curr_notecount in timechart_C:
 
         if Object_list[curr_notecount]["Type"] == "S_body":
           Span = Object_list[curr_notecount]["Span"]
-          SliderballX = main_curve.evaluate((pygame.time.get_ticks()-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[0][0]
-          SliderballY = main_curve.evaluate((pygame.time.get_ticks()-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[1][0]
+          SliderballX = main_curve.evaluate((Curr_time-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[0][0]
+          SliderballY = main_curve.evaluate((Curr_time-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[1][0]
 
           if DEBUG_MODE:
-            print(str((pygame.time.get_ticks()-(Hit+timechart[curr_notecount])-map_start)/Span))
+            print(str((Curr_time-(Hit+timechart[curr_notecount])-map_start)/Span))
           #in slider body
-          if 220<=pygame.time.get_ticks()-(timechart[curr_notecount]+Hit)-map_start<=Span-220:
+          if W50+20<=Curr_time-(timechart[curr_notecount]+Hit)-map_start<=Span-W50:
             Acc_Score+=100
             Hit_Value=100
             rating_count[1]+=1
             Acc = Acc_Score/(timechart_C[0]+1)/300
-            Score_cache.append((100,pygame.time.get_ticks(),Utilities.center(SliderballX,SliderballY,50,30)))
+            Score_cache.append((100,Curr_time,Utilities.center(SliderballX,SliderballY,50,30)))
             Combo=0
-            timechart_P.append(timechart_C[0])
-            timechart_C.pop(0)
+            timechart_C.remove(curr_notecount)
             Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)
             Score += Span
 
           #in/over leaving window
-          elif Span-200<pygame.time.get_ticks()-(timechart[curr_notecount]+Hit)-map_start:
+          elif Span-W50<Curr_time-(timechart[curr_notecount]+Hit)-map_start<Span+W50:
             rating_count[0]+=1
             Acc_Score+=300
             Hit_Value=100
             Hitsound.play()
             Acc = Acc_Score/(timechart_C[0]+1)/300
-            Score_cache.append((300,pygame.time.get_ticks(),Utilities.center(SliderballX,SliderballY,50,30)))
+            Score_cache.append((300,Curr_time,Utilities.center(SliderballX,SliderballY,50,30)))
             Combo+=1
-            timechart_P.append(timechart_C[0])
-            timechart_C.pop(0)
+            timechart_C.remove(curr_notecount)
             Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)
             Score += Span
 
-          elif Span+220<=pygame.time.get_ticks()-(timechart[curr_notecount]+Hit)-map_start:
+          elif Span+W50<=Curr_time-(timechart[curr_notecount]+Hit)-map_start:
             rating_count[1]+=1
             Acc_Score+=100
             Hit_Value=100
             Acc = Acc_Score/(timechart_C[0]+1)/300
-            Score_cache.append((100,pygame.time.get_ticks(),Utilities.center(SliderballX,SliderballY,50,30)))
+            Score_cache.append((100,Curr_time,Utilities.center(SliderballX,SliderballY,50,30)))
             Combo=0
-            timechart_P.append(timechart_C[0])
-            timechart_C.pop(0)
+            timechart_C.remove(curr_notecount)
             Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)
             Score += Span
           break
     #Score icon
 
-    if pygame.time.get_ticks()-spin_time <= 500:
-      Spin_text = Utilities.render_text(str(spin_number),FONT,80,WHITE)
+    if Curr_time-spin_time <= 500:
+      Spin_text = Utilities.render_text(str(spin_number),FONT,80,GRAY)
       curr_Objects.append((Spin_text[0],(540-1/2*Spin_text[1],400)))
 
 
     for scoreicon in Score_cache:
-      if pygame.time.get_ticks()-scoreicon[1] > 500:
+      if Curr_time-scoreicon[1] > 500:
         Score_cache.remove(scoreicon)
-      P300.set_alpha(255*(1-(pygame.time.get_ticks()-scoreicon[1])/500))
-      P100.set_alpha(255*(1-(pygame.time.get_ticks()-scoreicon[1])/500))
-      P50.set_alpha(255*(1-(pygame.time.get_ticks()-scoreicon[1])/500))
-      Pmiss.set_alpha(255*(1-(pygame.time.get_ticks()-scoreicon[1])/500))
+      P300.set_alpha(255*(1-(Curr_time-scoreicon[1])/500))
+      P100.set_alpha(255*(1-(Curr_time-scoreicon[1])/500))
+      P50.set_alpha(255*(1-(Curr_time-scoreicon[1])/500))
+      Pmiss.set_alpha(255*(1-(Curr_time-scoreicon[1])/500))
       if scoreicon[0]==300:
         curr_Objects.append((P300,scoreicon[2]))
       elif scoreicon[0]==100:
@@ -320,25 +323,23 @@ def Play(target,map_,diff,skin,mods):
         curr_Objects.append((Pmiss,scoreicon[2]))
 
     #Notes:Future ==>Current
-    if timechart_F != []:
-      if(pygame.time.get_ticks() >= timechart[timechart_F[0]]+map_start):
-
-        if Object_list[timechart_F[0]]["Type"]=="C":
+    if(Curr_time >= timechart[timechart_F[0]]+map_start):
+      if Object_list[timechart_F[0]]["Type"]=="C":
           timechart_C.append(timechart_F[0])
           timechart_F.pop(0)
 
-        elif Object_list[timechart_F[0]]["Type"]=="S_head":
+      elif Object_list[timechart_F[0]]["Type"]=="S_head":
           for i in range(2):
             timechart_C.append(timechart_F[0])
             timechart_F.pop(0)
 
-        elif Object_list[timechart_F[0]]["Type"]=="G":
+      elif Object_list[timechart_F[0]]["Type"]=="G":
           span = Object_list[timechart_F[0]]["Span"]
           spins=0
           quadrants=[0,0,0,0]
           timechart_C.append(timechart_F[0])
           timechart_F.pop(0)
-        elif Object_list[timechart_F[0]]["Type"]=="E":
+      elif Object_list[timechart_F[0]]["Type"]=="E":
           print("End\nTotal Score:"+str(Score))
           return {"Acc":Acc,
                   "Score":Score,
@@ -347,33 +348,25 @@ def Play(target,map_,diff,skin,mods):
 
 
     #Notes:Current ==>Past
-    if timechart_C != []:
-
-      #Circle
-      if(pygame.time.get_ticks() >= timechart[timechart_C[0]]+map_start+Hit+W50+10 and Object_list[timechart_C[0]]["Type"]=="C"):
-        timechart_P.append(timechart_C[0])
-        Score_cache.append((0,timechart[timechart_C[0]]+map_start+Hit+W50,(Object_list[timechart_C[0]]["Posx"]-25,Object_list[timechart_C[0]]["Posy"]-15)))
-        timechart_C.pop(0)
+    for curr_notecount in timechart_C:
+      if(Object_list[curr_notecount]["Type"]=="C")and Curr_time >= timechart[curr_notecount]+map_start+Hit+W50:
+        Score_cache.append((0,timechart[curr_notecount]+map_start+Hit+W50,(Object_list[curr_notecount]["Posx"]-25,Object_list[curr_notecount]["Posy"]-15)))
+        timechart_C.remove(curr_notecount)
         rating_count[3]+=1
         Combo=0
-
-      #Slider head
-      elif(pygame.time.get_ticks() >= timechart[timechart_C[0]]+map_start+Hit+200 and Object_list[timechart_C[0]]["Type"]=="S_head"):
-        Score_cache.append((0,timechart[timechart_C[0]]+map_start+Hit+200,(Object_list[timechart_C[0]]["Posx"]-25,Object_list[timechart_C[0]]["Posy"]-15)))
-        for i in range(2):
-          timechart_P.append(timechart_C[0])
-          timechart_C.pop(0)
+      if Object_list[curr_notecount]["Type"]=="S_head" and Curr_time >= timechart[curr_notecount]+map_start+Hit+W50:
+        Score_cache.append((0,timechart[curr_notecount]+map_start+Hit+W50,(Object_list[curr_notecount]["Posx"]-25,Object_list[curr_notecount]["Posy"]-15)))
+        timechart_C.remove(curr_notecount)
+        timechart_C.remove(curr_notecount+1)
         rating_count[3]+=1
         Combo=0
-
-      elif(pygame.time.get_ticks() >= timechart[timechart_C[0]]+map_start+span+Hit and Object_list[timechart_C[0]]["Type"]=="G"):
+      if(Curr_time >= timechart[curr_notecount]+map_start+span+Hit and Object_list[curr_notecount]["Type"]=="G"):
         if spins>span*spinner_req/1000:
-          Score_cache.append((300,timechart[timechart_C[0]]+map_start+span,(515,335)))
+          Score_cache.append((300,timechart[curr_notecount]+map_start+span,(515,335)))
           Acc_Score+=300
           Hitsound.play()
           Acc = Acc_Score/(timechart_C[0]+1)/300
-          timechart_P.append(timechart_C[0])
-          timechart_C.pop(0)
+          timechart_C.remove(curr_notecount)
           rating_count[0]+=1
           Combo+=1
         elif spins>span*spinner_req/2000:
@@ -381,8 +374,7 @@ def Play(target,map_,diff,skin,mods):
           Acc_Score+=100
           Hitsound.play()
           Acc = Acc_Score/(timechart_C[0]+1)/300
-          timechart_P.append(timechart_C[0])
-          timechart_C.pop(0)
+          timechart_C.remove(curr_notecount)
           rating_count[1]+=1
           Combo+=1
         elif spins>0:
@@ -390,8 +382,7 @@ def Play(target,map_,diff,skin,mods):
           Acc_Score+=50
           Hitsound.play()
           Acc = Acc_Score/(timechart_C[0]+1)/300
-          timechart_P.append(timechart_C[0])
-          timechart_C.pop(0)
+          timechart_C.remove(curr_notecount)
           rating_count[2]+=1
           Combo+=1
         else:
@@ -399,9 +390,8 @@ def Play(target,map_,diff,skin,mods):
           Acc_Score+=0
           Hitsound.play()
           Acc = Acc_Score/(timechart_C[0]+1)/300
-          timechart_P.append(timechart_C[0])
+          timechart_C.remove(curr_notecount)
           rating_count[3]+=1
-          timechart_C.pop(0)
           Combo=0
 
     for curr_notecount in timechart_C:
@@ -411,9 +401,9 @@ def Play(target,map_,diff,skin,mods):
           Posx = Object_list[curr_notecount]["Posx"]
           Posy = Object_list[curr_notecount]["Posy"]
           #1.Fade in
-          if(pygame.time.get_ticks()-timechart[curr_notecount]-map_start<=Fade_end):
-            approach_circle_size = 2*R*(4-3*(pygame.time.get_ticks()-timechart[curr_notecount]-map_start)/Hit)
-            Hit_circle.set_alpha(255*(pygame.time.get_ticks()-timechart[curr_notecount]-map_start)/Fade_end)
+          if(Curr_time-timechart[curr_notecount]-map_start<=Fade_end):
+            approach_circle_size = 2*R*(4-3*(Curr_time-timechart[curr_notecount]-map_start)/Hit)
+            Hit_circle.set_alpha(255*(Curr_time-timechart[curr_notecount]-map_start)/Fade_end)
             Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
             if(approach_circle_size>0):
               pygame.transform.scale(Approach_circle_original,(approach_circle_size,approach_circle_size),dest_surface=Approach_circle)
@@ -421,8 +411,8 @@ def Play(target,map_,diff,skin,mods):
             curr_Objects.append((Approach_circle,Utilities.center(Posx,Posy,approach_circle_size,approach_circle_size)))
             #2.Full opacity
 
-          if(pygame.time.get_ticks()-timechart[curr_notecount]-map_start>Fade_end and pygame.time.get_ticks()-timechart[curr_notecount]-map_start)<(Hit+W50):
-            approach_circle_size = 2*R*(4-3*(pygame.time.get_ticks()-timechart[curr_notecount]-map_start)/Hit)
+          if(Curr_time-timechart[curr_notecount]-map_start>Fade_end and Curr_time-timechart[curr_notecount]-map_start)<(Hit+W50):
+            approach_circle_size = 2*R*(4-3*(Curr_time-timechart[curr_notecount]-map_start)/Hit)
             Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
             Hit_circle.set_alpha(255)
             if(approach_circle_size>0):
@@ -435,8 +425,8 @@ def Play(target,map_,diff,skin,mods):
       if Object_list[curr_notecount]["Type"]=="S_head":
           Posx = Object_list[curr_notecount]["Posx"]
           Posy = Object_list[curr_notecount]["Posy"]
-          approach_circle_size = 2*R*(4-3*(pygame.time.get_ticks()-timechart[curr_notecount]-map_start)/Hit)
-          if pygame.time.get_ticks()-timechart[curr_notecount]-map_start<Hit+200:
+          approach_circle_size = 2*R*(4-3*(Curr_time-timechart[curr_notecount]-map_start)/Hit)
+          if Curr_time-timechart[curr_notecount]-map_start<Hit+W50:
             Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
             if(approach_circle_size>0):
               pygame.transform.scale(Approach_circle_original,(approach_circle_size,approach_circle_size),dest_surface=Approach_circle)
@@ -451,9 +441,9 @@ def Play(target,map_,diff,skin,mods):
         nodes = numpy.asfortranarray([Posx,Posy])
         main_curve = bezier.Curve(nodes, degree=len(Posx)-1)
         curr_Objects.append((Hit_circle,Utilities.center(Posx[-1],Posy[-1],2*R,2*R)))
-        if 0<(pygame.time.get_ticks()-timechart[curr_notecount]-Hit-map_start)/Span<1:
-          SliderballX = main_curve.evaluate((pygame.time.get_ticks()-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[0][0]
-          SliderballY = main_curve.evaluate((pygame.time.get_ticks()-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[1][0]
+        if 0<(Curr_time-timechart[curr_notecount]-Hit-map_start)/Span<1:
+          SliderballX = main_curve.evaluate((Curr_time-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[0][0]
+          SliderballY = main_curve.evaluate((Curr_time-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[1][0]
           curr_Objects.append((Slider_ball,Utilities.center(SliderballX,SliderballY,5*R,5*R)))
           curr_Objects.append((Hit_circle,Utilities.center(SliderballX,SliderballY,2*R,2*R)))
         for i in range(51):
@@ -479,7 +469,7 @@ def Play(target,map_,diff,skin,mods):
     curr_Objects.append((Acc_text[0],(target.get_width()-Acc_text[1]-50,30+Score_text[2])))
 
     if DEBUG_MODE:
-      Timer_text = Utilities.render_text(str(pygame.time.get_ticks()-map_start),FONT,30,WHITE)
+      Timer_text = Utilities.render_text(str(Curr_time-map_start),FONT,30,WHITE)
       curr_Objects.append((Timer_text[0],(0,0)))
       FPS_text = Utilities.render_text(str(FPS),FONT,30,WHITE)
       curr_Objects.append((FPS_text[0],(0,30)))
