@@ -1,4 +1,4 @@
-from ast import For, If
+from ast import And, For, If
 import pygame,sys
 from pygame.locals import *
 import json
@@ -133,6 +133,8 @@ def Play(target,map_,diff,skin,mods):
 
   while True:
     Curr_time = pygame.time.get_ticks()
+    if timechart_C != [] and timechart_C[0] != 0:
+      Acc = Acc_Score/(timechart_C[0])/300
     if music == False and Curr_time>=map_start+Start_delay:
       pygame.mixer.music.play()
       music=True
@@ -178,7 +180,6 @@ def Play(target,map_,diff,skin,mods):
                   rating_count[3]+=1
                   Hit_Value=0
                 Acc_Score += Hit_Value
-                Acc = Acc_Score/(timechart_C[0]+1)/300
                 Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)
                 timechart_C.remove(curr_notecount)
                 break
@@ -194,7 +195,6 @@ def Play(target,map_,diff,skin,mods):
                 if error<=W50:
                   Score_cache.append((300,clicktime,Utilities.center(Posx,Posy,50,30)))
                   Acc_Score += 300
-                  Acc = Acc_Score*(timechart_C[0]+1)/300
                   rating_count[0]+=1
                   Hitsound.play()
                   Combo+=1
@@ -229,10 +229,7 @@ def Play(target,map_,diff,skin,mods):
               rating_count[1]+=1
               Score_cache.append((100,Curr_time,Utilities.center(SliderballX,SliderballY,50,30)))
               Combo=0
-              Acc = Acc_Score/(timechart_C[0]+1)/300
               timechart_C.remove(curr_notecount)
-          else:
-            Acc = Acc_Score/(timechart_C[0]+1)/300
         if Object_list[curr_notecount]["Type"] == "G":
           if Mouse_pos[0] >= 540 and Mouse_pos[1] <= 360:
             quadrants[0]=1
@@ -270,7 +267,6 @@ def Play(target,map_,diff,skin,mods):
             Acc_Score+=100
             Hit_Value=100
             rating_count[1]+=1
-            Acc = Acc_Score/(timechart_C[0]+1)/300
             Score_cache.append((100,Curr_time,Utilities.center(SliderballX,SliderballY,50,30)))
             Combo=0
             timechart_C.remove(curr_notecount)
@@ -283,7 +279,6 @@ def Play(target,map_,diff,skin,mods):
             Acc_Score+=300
             Hit_Value=100
             Hitsound.play()
-            Acc = Acc_Score/(timechart_C[0]+1)/300
             Score_cache.append((300,Curr_time,Utilities.center(SliderballX,SliderballY,50,30)))
             Combo+=1
             timechart_C.remove(curr_notecount)
@@ -294,7 +289,6 @@ def Play(target,map_,diff,skin,mods):
             rating_count[1]+=1
             Acc_Score+=100
             Hit_Value=100
-            Acc = Acc_Score/(timechart_C[0]+1)/300
             Score_cache.append((100,Curr_time,Utilities.center(SliderballX,SliderballY,50,30)))
             Combo=0
             timechart_C.remove(curr_notecount)
@@ -342,6 +336,8 @@ def Play(target,map_,diff,skin,mods):
           timechart_C.append(timechart_F[0])
           timechart_F.pop(0)
       elif Object_list[timechart_F[0]]["Type"]=="E":
+          if timechart_C != []:
+            Acc = Acc_Score/(len(timechart)-2)/300
           print("End\nTotal Score:"+str(Score))
           return {"Acc":Acc,
                   "Score":Score,
@@ -359,7 +355,10 @@ def Play(target,map_,diff,skin,mods):
       if Object_list[curr_notecount]["Type"]=="S_head" and Curr_time >= timechart[curr_notecount]+map_start+Hit+W50:
         Score_cache.append((0,timechart[curr_notecount]+map_start+Hit+W50,(Object_list[curr_notecount]["Posx"]-25,Object_list[curr_notecount]["Posy"]-15)))
         timechart_C.remove(curr_notecount)
-        timechart_C.remove(curr_notecount+1)
+        try:
+          timechart_C.remove(curr_notecount+1)
+        except:
+          pass
         rating_count[3]+=1
         Combo=0
       if(Curr_time >= timechart[curr_notecount]+map_start+span+Hit and Object_list[curr_notecount]["Type"]=="G"):
@@ -367,7 +366,6 @@ def Play(target,map_,diff,skin,mods):
           Score_cache.append((300,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
           Acc_Score+=300
           Hitsound.play()
-          Acc = Acc_Score/(timechart_C[0]+1)/300
           timechart_C.remove(curr_notecount)
           rating_count[0]+=1
           Combo+=1
@@ -375,15 +373,13 @@ def Play(target,map_,diff,skin,mods):
           Score_cache.append((100,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
           Acc_Score+=100
           Hitsound.play()
-          Acc = Acc_Score/(timechart_C[0]+1)/300
           timechart_C.remove(curr_notecount)
           rating_count[1]+=1
           Combo+=1
-        elif spins>0:
+        elif spins>1:
           Score_cache.append((50,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
           Acc_Score+=50
           Hitsound.play()
-          Acc = Acc_Score/(timechart_C[0]+1)/300
           timechart_C.remove(curr_notecount)
           rating_count[2]+=1
           Combo+=1
@@ -391,7 +387,6 @@ def Play(target,map_,diff,skin,mods):
           Score_cache.append((0,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
           Acc_Score+=0
           Hitsound.play()
-          Acc = Acc_Score/(timechart_C[0]+1)/300
           timechart_C.remove(curr_notecount)
           rating_count[3]+=1
           Combo=0
@@ -478,5 +473,4 @@ def Play(target,map_,diff,skin,mods):
 
     if Combo>max_combo:
       max_combo = Combo
-
     Utilities.render(target,curr_Objects)
