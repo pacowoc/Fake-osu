@@ -3,7 +3,7 @@ import Utilities
 import math
 from pygame.locals import *
 
-FONT = "fonts\\Consolas.ttf"
+FONT = "fonts\\Aller_Lt.ttf"
 WHITE = (255,255,255)
 
 def Render(target,name,diff,skin,mods,score,acc,rating_count,max_combo):
@@ -15,8 +15,13 @@ def Render(target,name,diff,skin,mods,score,acc,rating_count,max_combo):
     Rank_texture["C"]=pygame.image.load("skins\\"+skin+"\\C.png").convert_alpha()
     Rank_texture["D"]=pygame.image.load("skins\\"+skin+"\\D.png").convert_alpha()
     Cursor=pygame.image.load("skins\\"+skin+"\\cursor.png").convert_alpha()
-    Background=pygame.image.load("skins\\"+skin+"\\result_screen.png").convert_alpha()
+    GUI=pygame.image.load("skins\\"+skin+"\\result_screen.png").convert_alpha()
     FC=pygame.image.load("skins\\"+skin+"\\FC.png").convert_alpha()
+    try:
+        Background=pygame.image.load("maps\\"+name+"\\background.png").convert_alpha()
+    except:
+        Background=pygame.Surface((1080,720))
+        Background.fill(WHITE)
     do_FC=False
     map_combo=rating_count[0]+rating_count[1]+rating_count[2]+rating_count[3]
     if max_combo == map_combo:
@@ -44,33 +49,34 @@ def Render(target,name,diff,skin,mods,score,acc,rating_count,max_combo):
                     sys.exit()
         curr_Objects = []
         curr_Objects.append((Background,(0,0)))
+        curr_Objects.append((GUI,(0,0)))
         if do_FC:
-            curr_Objects.append((FC,(900,350)))
+            curr_Objects.append((FC,(400,507)))
         curr_Objects.append((Rank_texture[rank],(576,47)))
 
-        MComboText = Utilities.render_text(str(max_combo),FONT,45,WHITE)
-        curr_Objects.append((MComboText[0],(330-MComboText[1],530)))
+        MComboText = Utilities.render_text("Max combo:"+str(max_combo)+"x",FONT,30,WHITE)
+        curr_Objects.append((MComboText[0],(100,527)))
 
-        Acc_text = Utilities.render_text(str(math.ceil(acc*10000)/100),FONT,45,WHITE)
-        curr_Objects.append((Acc_text[0],(260,432)))
+        Acc_text = Utilities.render_text("Accuracy: "+str(math.ceil(acc*10000)/100),FONT,30,WHITE)
+        curr_Objects.append((Acc_text[0],(100,433)))
 
-        Score_text = Utilities.render_text(str(int(score)),FONT,60,WHITE)
-        curr_Objects.append((Score_text[0],(240,325)))
+        Score_text = Utilities.render_text("Score:"+str(int(score)),FONT,50,WHITE)
+        curr_Objects.append((Score_text[0],(100,329)))
 
-        Rating_text_300 = Utilities.render_text(str(rating_count[0]),FONT,90,WHITE)
+        Rating_text_300 = Utilities.render_text(str(rating_count[0]),FONT,50,WHITE)
         curr_Objects.append((Rating_text_300[0],Utilities.center(230,145,Rating_text_300[1],90)))
 
-        Rating_text_100 = Utilities.render_text(str(rating_count[1]),FONT,90,WHITE)
+        Rating_text_100 = Utilities.render_text(str(rating_count[1]),FONT,50,WHITE)
         curr_Objects.append((Rating_text_100[0],Utilities.center(456,145,Rating_text_100[1],90)))
 
-        Rating_text_50 = Utilities.render_text(str(rating_count[2]),FONT,90,WHITE)
+        Rating_text_50 = Utilities.render_text(str(rating_count[2]),FONT,50,WHITE)
         curr_Objects.append((Rating_text_50[0],Utilities.center(230,252,Rating_text_50[1],90)))
 
-        Rating_text_0 = Utilities.render_text(str(rating_count[3]),FONT,90,WHITE)
+        Rating_text_0 = Utilities.render_text(str(rating_count[3]),FONT,50,WHITE)
         curr_Objects.append((Rating_text_0[0],Utilities.center(456,252,Rating_text_0[1],90)))
 
-        Topic_text = Utilities.render_text(name+"["+diff+"]",FONT,60,WHITE)
-        curr_Objects.append((Topic_text[0],(50,10)))
+        Topic_text = Utilities.render_text(name+"["+diff+"]",FONT,35,WHITE)
+        curr_Objects.append((Topic_text[0],(10,10)))
 
         Mouse_pos = pygame.mouse.get_pos()
         curr_Objects.append((Cursor,Utilities.center(Mouse_pos[0],Mouse_pos[1],50,50)))

@@ -3,7 +3,8 @@
 		"OD":3,
 		"AR":8,
 		"CS":3,
-		"HP":1
+		"HP":1,
+		"Delay":0
 	},
 	"Objects":[
 		{

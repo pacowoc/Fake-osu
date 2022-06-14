@@ -12,7 +12,7 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 GRAY = (120,120,120)
 TRANSPARENT = (0,0,0,0)
-FONT = "fonts\\Consolas.ttf"
+FONT = "fonts\\Aller_Lt.ttf"
 
 DEBUG_MODE=False
 def Play(target,map_,diff,skin,mods):
@@ -463,7 +463,7 @@ def Play(target,map_,diff,skin,mods):
     curr_Objects.append((Score_text[0],(target.get_width()-Score_text[1]-30,30)))
 
     #Combo counter
-    Combo_text = Utilities.render_text(str(Combo),FONT,80,WHITE)
+    Combo_text = Utilities.render_text(str(Combo)+"x",FONT,80,WHITE)
     curr_Objects.append((Combo_text[0],(50,target.get_height()-Combo_text[2]-50)))
 
     #Acc counter
@@ -478,6 +478,5 @@ def Play(target,map_,diff,skin,mods):
 
     if Combo>max_combo:
       max_combo = Combo
-    target.fill(BLACK)
 
     Utilities.render(target,curr_Objects)

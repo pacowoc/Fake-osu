@@ -1,8 +1,7 @@
 import pygame
 from pygame.locals import *
 
-TRANSPARENT = (0,0,0,0)
-TRANSLUCENT = (0,0,0,128)
+BLACK = (0,0,0)
 
 def center(posX,posY,sizeX,sizeY):
     posnX=posX-1/2*sizeX
@@ -16,6 +15,7 @@ def render_text(Content,font,size,color):
 
     return (Text,Font.size(Content)[0],Font.size(Content)[1])
 def render(target,curr_Objects):
+    target.fill(BLACK)
     for obj in curr_Objects:
       target.blit(obj[0],obj[1])
     pygame.display.update()
