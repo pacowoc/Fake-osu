@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 
 BLACK = (0,0,0)
+TRANSPARENT = (0,0,0,0)
+TRANSLUCENT = (0,0,0,128)
 
 def center(posX,posY,sizeX,sizeY):
     posnX=posX-1/2*sizeX

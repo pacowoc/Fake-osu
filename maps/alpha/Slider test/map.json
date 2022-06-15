@@ -1,85 +1,49 @@
 {
 	"Info":{
-		"OD":0,
+		"OD":6,
 		"AR":8,
 		"CS":3,
 		"HP":1,
 		"Delay":0
 	},
 	"Objects":[
-        {
-            "Type":"S_head",
-            "Posx":456,
-            "Posy":100,
-            "Time":1000
-		},
 		{
-			"Type":"S_body",
+			"Type":"S",
 			"Posx":[456,500,650],
 			"Posy":[100,150,200],
 			"Time":1000,
 			"Span":1000
 		},
 		{
-			"Type":"S_head",
-			"Posx":958,
-			"Posy":600,
-			"Time":3000
-		},
-		{
-			"Type":"S_body",
+			"Type":"S",
 			"Posx":[958,700,650],
 			"Posy":[600,560,400],
 			"Time":3000,
 			"Span":1000
 		},
-        {
-            "Type":"S_head",
-            "Posx":456,
-            "Posy":100,
-            "Time":5000
-		},
 		{
-			"Type":"S_body",
+			"Type":"S",
 			"Posx":[456,500,650],
 			"Posy":[100,150,200],
 			"Time":5000,
 			"Span":1000
 		},
 		{
-			"Type":"S_head",
-			"Posx":958,
-			"Posy":600,
-			"Time":7000
-		},
-		{
-			"Type":"S_body",
+			"Type":"S",
 			"Posx":[958,700,650],
 			"Posy":[600,560,400],
 			"Time":7000,
 			"Span":1000
 		},
-        {
-            "Type":"S_head",
-            "Posx":456,
-            "Posy":100,
-            "Time":9000
-		},
 		{
-			"Type":"S_body",
+			"Type":"S",
 			"Posx":[456,500,650],
 			"Posy":[100,150,200],
 			"Time":9000,
 			"Span":1000
 		},
 		{
-			"Type":"S_head",
-			"Posx":958,
-			"Posy":600,
-			"Time":11000
-		},
-		{
-			"Type":"S_body",
+			"Type":"S",
 			"Posx":[958,700,650],
 			"Posy":[600,560,400],
 			"Time":11000,

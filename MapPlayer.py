@@ -1,4 +1,3 @@
-from ast import And, For, If
 import pygame,sys
 from pygame.locals import *
 import json
@@ -6,6 +5,8 @@ import math
 import Utilities
 import bezier
 import numpy
+import ResultScreen
+import ModEffects
 
 
 BLACK = (0,0,0)
@@ -14,7 +15,7 @@ GRAY = (120,120,120)
 TRANSPARENT = (0,0,0,0)
 FONT = "fonts\\Aller_Lt.ttf"
 
-DEBUG_MODE=False
+DEBUG_MODE= False
 def Play(target,map_,diff,skin,mods):
 
   ##LOAD TEXTURES AND MAP
@@ -37,33 +38,31 @@ def Play(target,map_,diff,skin,mods):
     Song=pygame.mixer.music.load("skins\\"+skin+"\\failsave.mp3")
   content = json.load(open('maps\\'+map_+"\\"+diff+'\\map.json'))
 
-  AR = content["Info"]["AR"]
+  #Extract content
+
+  AR = math.floor(content["Info"]["AR"])
   CS = content["Info"]["CS"]
   OD = content["Info"]["OD"]
   Start_delay = content['Info']["Delay"]
   Object_list = content["Objects"]
 
-  ##CALCULATIONS
-  Mods_Multi = 1
-  #HR
-  if mods[0] == 1:
-    Mods_Multi *= 1.06
-    AR*=1.4
-    CS*=1.4
-    OD*=1.4
-    if AR>10:
-      AR=10
-    if CS>10:
-      CS=10
-    if OD>10:
-      OD=10
+  #Dirty slider stuff
 
-  #EZ
-  if mods[0] == -1:
-    Mods_Multi *= 0.3
-    AR*=0.5
-    CS*=0.5
-    OD*=0.5
+  i = 0
+  while i < len(Object_list):
+    if Object_list[i]["Type"] == "S":
+      Object_list[i]["Type"] = "S_body"
+      Object_list.insert(i,{
+        "Type":"S_head",
+        "Time":Object_list[i]["Time"],
+        "Posx":Object_list[i]["Posx"][0],
+        "Posy":Object_list[i]["Posy"][0]
+      })
+    i+=1
+
+  ##CALCULATIONS
+  (AR,CS,OD,Mods_Multi) = ModEffects.calculate(AR,CS,OD,mods)
+
 
   #AR display calculations
   if(AR<5):#low ar
@@ -92,6 +91,8 @@ def Play(target,map_,diff,skin,mods):
 
   R = 54.4-4.48*CS
 
+  #Transform Resizable surface
+
   Hit_circle = pygame.Surface((2*R,2*R)).convert_alpha()
   pygame.transform.scale(Hit_circle_original,(2*R,2*R),dest_surface=Hit_circle)
 
@@ -100,17 +101,17 @@ def Play(target,map_,diff,skin,mods):
 
   Slider_ball = pygame.Surface((5*R,5*R)).convert_alpha()
   pygame.transform.scale(Hit_circle_original,(5*R,5*R),dest_surface=Slider_ball)
+    
     #Assign Timechart
   timechart=[]
   timechart_F=[]
   timechart_C=[]
-  timechart_P=[]
   for obj in Object_list:
     timechart.append(int(obj["Time"])-Hit)
   for i in range(len(timechart)):
     timechart_F.append(i)
+    
     #initialize
-
   map_start = pygame.time.get_ticks()
   pygame.key.set_repeat(0)
   pygame.mouse.set_visible(0)
@@ -128,10 +129,11 @@ def Play(target,map_,diff,skin,mods):
   max_combo = 0
   FPS_clock=pygame.time.Clock()
   music = False
-
+  pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
   ##MAIN LOOP
 
   while True:
+    #Get time
     Curr_time = pygame.time.get_ticks()
     if timechart_C != [] and timechart_C[0] != 0:
       Acc = Acc_Score/(timechart_C[0])/300
@@ -190,7 +192,6 @@ def Play(target,map_,diff,skin,mods):
               distance = math.sqrt((Mouse_pos[0]-Posx)**2+(Mouse_pos[1]-Posy)**2)
               if distance<R:
                 error = clicktime-timechart[curr_notecount]-map_start-Hit
-                print(error)
                 error = abs(error)
                 if error<=W50:
                   Score_cache.append((300,clicktime,Utilities.center(Posx,Posy,50,30)))
@@ -256,12 +257,13 @@ def Play(target,map_,diff,skin,mods):
       for curr_notecount in timechart_C:
 
         if Object_list[curr_notecount]["Type"] == "S_body":
+          Posx = Object_list[curr_notecount]["Posx"]
+          Posy = Object_list[curr_notecount]["Posy"]
           Span = Object_list[curr_notecount]["Span"]
+          nodes = numpy.asfortranarray([Posx,Posy])
+          main_curve = bezier.Curve(nodes, degree=len(Posx)-1)
           SliderballX = main_curve.evaluate((Curr_time-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[0][0]
           SliderballY = main_curve.evaluate((Curr_time-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[1][0]
-
-          if DEBUG_MODE:
-            print(str((Curr_time-(Hit+timechart[curr_notecount])-map_start)/Span))
           #in slider body
           if W50+20<=Curr_time-(timechart[curr_notecount]+Hit)-map_start<=Span-W50:
             Acc_Score+=100
@@ -271,7 +273,6 @@ def Play(target,map_,diff,skin,mods):
             Combo=0
             timechart_C.remove(curr_notecount)
             Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)
-            Score += Span
 
           #in/over leaving window
           elif Span-W50<Curr_time-(timechart[curr_notecount]+Hit)-map_start<Span+W50:
@@ -293,7 +294,6 @@ def Play(target,map_,diff,skin,mods):
             Combo=0
             timechart_C.remove(curr_notecount)
             Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)
-            Score += Span
           break
     #Score icon
 
@@ -336,13 +336,10 @@ def Play(target,map_,diff,skin,mods):
           timechart_C.append(timechart_F[0])
           timechart_F.pop(0)
       elif Object_list[timechart_F[0]]["Type"]=="E":
-          if timechart_C != []:
-            Acc = Acc_Score/(len(timechart)-2)/300
-          print("End\nTotal Score:"+str(Score))
-          return {"Acc":Acc,
-                  "Score":Score,
-                  "Rating_count":rating_count,
-                  "Max_combo":max_combo}
+          Acc = Acc_Score/(len(timechart)-1)/300
+          pygame.mixer.music.unload()
+          ResultScreen.Render(target,map_,diff,skin,mods,Score,Acc,rating_count,max_combo)
+
 
 
     #Notes:Current ==>Past
@@ -401,8 +398,8 @@ def Play(target,map_,diff,skin,mods):
           if(Curr_time-timechart[curr_notecount]-map_start<=Fade_end):
             approach_circle_size = 2*R*(4-3*(Curr_time-timechart[curr_notecount]-map_start)/Hit)
             Hit_circle.set_alpha(255*(Curr_time-timechart[curr_notecount]-map_start)/Fade_end)
-            Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
             if(approach_circle_size>0):
+              Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
               pygame.transform.scale(Approach_circle_original,(approach_circle_size,approach_circle_size),dest_surface=Approach_circle)
             curr_Objects.append((Hit_circle,Utilities.center(Posx,Posy,2*R,2*R)))
             curr_Objects.append((Approach_circle,Utilities.center(Posx,Posy,approach_circle_size,approach_circle_size)))
@@ -410,9 +407,9 @@ def Play(target,map_,diff,skin,mods):
 
           if(Curr_time-timechart[curr_notecount]-map_start>Fade_end and Curr_time-timechart[curr_notecount]-map_start)<(Hit+W50):
             approach_circle_size = 2*R*(4-3*(Curr_time-timechart[curr_notecount]-map_start)/Hit)
-            Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
             Hit_circle.set_alpha(255)
             if(approach_circle_size>0):
+              Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
               pygame.transform.scale(Approach_circle_original,(approach_circle_size,approach_circle_size),dest_surface=Approach_circle)
             curr_Objects.append((Hit_circle,Utilities.center(Posx,Posy,2*R,2*R)))
             curr_Objects.append((Approach_circle,Utilities.center(Posx,Posy,approach_circle_size,approach_circle_size)))
@@ -420,15 +417,15 @@ def Play(target,map_,diff,skin,mods):
 
       #Slider head
       if Object_list[curr_notecount]["Type"]=="S_head":
-          Posx = Object_list[curr_notecount]["Posx"]
-          Posy = Object_list[curr_notecount]["Posy"]
-          approach_circle_size = 2*R*(4-3*(Curr_time-timechart[curr_notecount]-map_start)/Hit)
-          if Curr_time-timechart[curr_notecount]-map_start<Hit+W50:
+        Posx = Object_list[curr_notecount]["Posx"]
+        Posy = Object_list[curr_notecount]["Posy"]
+        approach_circle_size = 2*R*(4-3*(Curr_time-timechart[curr_notecount]-map_start)/Hit)
+        if Curr_time-timechart[curr_notecount]-map_start<Hit+W50:
+          if(approach_circle_size>0):
             Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
-            if(approach_circle_size>0):
-              pygame.transform.scale(Approach_circle_original,(approach_circle_size,approach_circle_size),dest_surface=Approach_circle)
-            curr_Objects.append((Hit_circle,Utilities.center(Posx,Posy,2*R,2*R)))
-            curr_Objects.append((Approach_circle,Utilities.center(Posx,Posy,approach_circle_size,approach_circle_size)))
+            pygame.transform.scale(Approach_circle_original,(approach_circle_size,approach_circle_size),dest_surface=Approach_circle)
+          curr_Objects.append((Hit_circle,Utilities.center(Posx,Posy,2*R,2*R)))
+          curr_Objects.append((Approach_circle,Utilities.center(Posx,Posy,approach_circle_size,approach_circle_size)))
 
       #Slider body
       if Object_list[curr_notecount]["Type"]=="S_body":
