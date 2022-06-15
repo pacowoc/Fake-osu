@@ -19,6 +19,8 @@ def Render(target,map_,diff,skin,mods,score,acc,rating_count,max_combo):
     FC=pygame.image.load("skins\\"+skin+"\\FC.png").convert_alpha()
     HR = pygame.image.load("skins\\"+skin+"\\hr.png").convert_alpha()
     EZ = pygame.image.load("skins\\"+skin+"\\ez.png").convert_alpha()
+    DT = pygame.image.load("skins\\"+skin+"\\dt.png").convert_alpha()
+    HT = pygame.image.load("skins\\"+skin+"\\ht.png").convert_alpha()
     try:
         Background=pygame.image.load("maps\\"+map_+"\\background.png").convert_alpha()
     except:
@@ -79,12 +81,19 @@ def Render(target,map_,diff,skin,mods,score,acc,rating_count,max_combo):
         Topic_text = Utilities.render_text(map_+"["+diff+"]",FONT,35,WHITE)
         curr_Objects.append((Topic_text[0],(10,10)))
         mod_count = 0
-        if mods[0]== 1:
-            curr_Objects.append((HR,(576+80*mod_count,397)))
-            mod_count+=1
-        if mods[0] == -1:
+        if mods[2] == -1:
             curr_Objects.append((EZ,(576+80*mod_count,397)))
             mod_count+=1
+        if mods[1] == -1:
+            curr_Objects.append((HT,(576+80*mod_count,397)))
+            mod_count+=1
+        if mods[1] == 1:
+            curr_Objects.append((DT,(576+80*mod_count,397)))
+            mod_count+=1
+        if mods[2]== 1:
+            curr_Objects.append((HR,(576+80*mod_count,397)))
+            mod_count+=1
+
 
         Mouse_pos = pygame.mouse.get_pos()
         curr_Objects.append((Cursor,Utilities.center(Mouse_pos[0],Mouse_pos[1],50,50)))

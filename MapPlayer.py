@@ -6,7 +6,6 @@ import Utilities
 import bezier
 import numpy
 import ResultScreen
-import ModEffects
 
 
 BLACK = (0,0,0)
@@ -32,19 +31,23 @@ def Play(target,map_,diff,skin,mods):
 
   Hitsound=pygame.mixer.Sound("skins\\"+skin+"\\hitsound.ogg")
   Bonus=pygame.mixer.Sound("skins\\"+skin+"\\spinnerbonus.wav")
-  try:
-    Song=pygame.mixer.music.load("maps\\"+map_+"\\music.wav")
-  except:
-    Song=pygame.mixer.music.load("skins\\"+skin+"\\failsave.mp3")
   content = json.load(open('maps\\'+map_+"\\"+diff+'\\map.json'))
-
+  try:
+    if mods[1] == 1:  
+      pygame.mixer.music.load("maps\\"+map_+"\\music_dt.wav")
+    elif mods[1] == -1:
+      pygame.mixer.music.load("maps\\"+map_+"\\music_ht.wav")
+    else:
+      pygame.mixer.music.load("maps\\"+map_+"\\music.wav")
+  except:
+    pygame.mixer.music.load("skins\\"+skin+"\\failsave.mp3")
   #Extract content
 
-  AR = math.floor(content["Info"]["AR"])
+  AR = content["Info"]["AR"]
   CS = content["Info"]["CS"]
   OD = content["Info"]["OD"]
   Start_delay = content['Info']["Delay"]
-  Object_list = content["Objects"]
+  Object_list =content["Objects"]
 
   #Dirty slider stuff
 
@@ -59,10 +62,69 @@ def Play(target,map_,diff,skin,mods):
         "Posy":Object_list[i]["Posy"][0]
       })
     i+=1
-
+  Object_list = tuple(Object_list)
   ##CALCULATIONS
-  (AR,CS,OD,Mods_Multi) = ModEffects.calculate(AR,CS,OD,mods)
+  Mods_Multi = 1
+    
+  #DT
+  if mods[1] == 1:
+    Mods_Multi*=1.12
+    #LOW AR --> HIGH AR
+    if AR<=5:
+      AR = 8/15*AR+5
+    #HIGH AR --> HIGH AR
+    else:
+      AR = 2/3*AR+13/3
+        
+    OD = 2/3*OD+40/9
+    for obj in Object_list:
+      try:
+        obj["Span"] /= 1.5
+      except:
+        pass
+      obj["Time"] /= 1.5
+    Start_delay /= 1.5
 
+  #HT
+  if mods[1] == -1:
+    Mods_Multi*=0.3
+    #LOW AR --> LOW AR
+    if AR<=5:
+      AR = 4/3*AR-5
+    #HIGH AR --> LOW AR
+    elif AR<=7:
+      AR = 5/3*AR-20/3
+    #HIGH AR --> HIGH AR
+    else:
+      AR = 4/3*AR-13/3
+    OD = 4/3*OD-40/9
+    for obj in Object_list:
+      try:
+        obj["Span"] /= 0.75
+      except:
+        pass
+      obj["Time"] /= 0.75
+    Start_delay /= 0.75
+  
+  #HR
+  if mods[2] == 1:
+    Mods_Multi *= 1.06
+    AR*=1.4
+    CS*=1.4
+    OD*=1.4
+    if AR>10:
+      AR=10
+    if CS>10:
+      CS=10
+    if OD>10:
+      OD=10
+
+    #EZ
+  if mods[2] == -1:
+    Mods_Multi *= 0.3
+    AR*=0.5
+    CS*=0.5
+    OD*=0.5
 
   #AR display calculations
   if(AR<5):#low ar
@@ -108,6 +170,7 @@ def Play(target,map_,diff,skin,mods):
   timechart_C=[]
   for obj in Object_list:
     timechart.append(int(obj["Time"])-Hit)
+    timmechart = tuple(timechart)
   for i in range(len(timechart)):
     timechart_F.append(i)
     
@@ -210,7 +273,6 @@ def Play(target,map_,diff,skin,mods):
                   Hit_Value = 0
                 Score += Hit_Value+(Hit_Value*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)   
                 break
-
     #Hold cycle
     if pygame.key.get_pressed()[K_x] or pygame.key.get_pressed()[K_z]:
       for curr_notecount in timechart_C:
@@ -341,7 +403,6 @@ def Play(target,map_,diff,skin,mods):
           ResultScreen.Render(target,map_,diff,skin,mods,Score,Acc,rating_count,max_combo)
 
 
-
     #Notes:Current ==>Past
     for curr_notecount in timechart_C:
       if(Object_list[curr_notecount]["Type"]=="C")and Curr_time >= timechart[curr_notecount]+map_start+Hit+W50:
@@ -387,7 +448,6 @@ def Play(target,map_,diff,skin,mods):
           timechart_C.remove(curr_notecount)
           rating_count[3]+=1
           Combo=0
-
     for curr_notecount in timechart_C:
 
         #Circle
@@ -440,7 +500,7 @@ def Play(target,map_,diff,skin,mods):
           SliderballY = main_curve.evaluate((Curr_time-(Hit+timechart[curr_notecount])-map_start)/Span).tolist()[1][0]
           curr_Objects.append((Slider_ball,Utilities.center(SliderballX,SliderballY,5*R,5*R)))
           curr_Objects.append((Hit_circle,Utilities.center(SliderballX,SliderballY,2*R,2*R)))
-        for i in range(51):
+        for i in range(50):
           curr_Objects.append((Slider_body,Utilities.center(main_curve.evaluate(i/50).tolist()[0][0],main_curve.evaluate(i/50).tolist()[1][0],2*R,2*R)))
 
       #Spinner

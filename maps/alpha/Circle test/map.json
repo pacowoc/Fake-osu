@@ -4,7 +4,7 @@
 		"AR":8,
 		"CS":3,
 		"HP":1,
-		"Delay":0
+		"Delay":2000
 	},
 	"Objects":[
 		{
