@@ -27,18 +27,18 @@ def Render(target,map_,diff,skin,mods,score,acc,rating_count,max_combo):
         Background=pygame.Surface((1080,720))
         Background.fill(WHITE)
     do_FC=False
-    map_combo=rating_count[0]+rating_count[1]+rating_count[2]+rating_count[3]
+    map_combo=rating_count["300"]+rating_count["100"]+rating_count["50"]+rating_count["0"]
     if max_combo == map_combo:
         do_FC=True
-    if rating_count[0] == map_combo:
+    if rating_count["300"] == map_combo:
         rank = "SS"
-    elif rating_count[0]>=0.9*map_combo and rating_count[3]==0 and rating_count[2]<=0.01*map_combo:
+    elif rating_count["300"]>=0.9*map_combo and rating_count["0"]==0 and rating_count["50"]<=0.01*map_combo:
         rank = "S"
-    elif (rating_count[0]>=0.8*map_combo and rating_count[3]==0 )or rating_count[0]>=0.9*map_combo:
+    elif (rating_count["300"]>=0.8*map_combo and rating_count["0"]==0 )or rating_count["300"]>=0.9*map_combo:
         rank = "A"
-    elif (rating_count[0]>=0.7*map_combo and rating_count[3]==0 )or rating_count[0]>=0.8*map_combo:
+    elif (rating_count["300"]>=0.7*map_combo and rating_count["0"]==0 )or rating_count["300"]>=0.8*map_combo:
         rank = "B"
-    elif rating_count[0]>=0.6*map_combo:
+    elif rating_count["300"]>=0.6*map_combo:
         rank = "C"
     else:
         rank = "D"
