@@ -6,9 +6,12 @@ TRANSPARENT = (0,0,0,0)
 TRANSLUCENT = (0,0,0,128)
 
 def center(posX,posY,sizeX,sizeY):
-    posnX=posX-1/2*sizeX
-    posnY=posY-1/2*sizeY
-
+    if sizeX>0 and sizeY>0:
+        posnX=posX-1/2*sizeX
+        posnY=posY-1/2*sizeY
+    else:
+        posnX=posX  
+        posnY=posY
     return (posnX,posnY)
 
 def render_text(Content,font,size,color):

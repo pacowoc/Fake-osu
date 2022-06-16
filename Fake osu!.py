@@ -1,8 +1,8 @@
 import pygame
 import MapPlayer
 
-MAP_NAME = "beta"
-MAP_DIFF = "Object type test"
+MAP_NAME = "Example"
+MAP_DIFF = "Normal"
 SKIN_NAME = "test"
 
 pygame.init()

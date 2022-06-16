@@ -1,3 +1,4 @@
+
 import pygame,sys
 from pygame.locals import *
 import json
@@ -65,7 +66,27 @@ def Play(target,map_,diff,skin,mods):
   Object_list = tuple(Object_list)
   ##CALCULATIONS
   Mods_Multi = 1
-    
+  
+  #HR
+  if mods[2] == 1:
+    Mods_Multi *= 1.06
+    AR*=1.4
+    CS*=1.4
+    OD*=1.4
+    if AR>10:
+      AR=10
+    if CS>10:
+      CS=10
+    if OD>10:
+      OD=10
+
+  #EZ
+  if mods[2] == -1:
+    Mods_Multi *= 0.3
+    AR*=0.5
+    CS*=0.5
+    OD*=0.5
+
   #DT
   if mods[1] == 1:
     Mods_Multi*=1.12
@@ -105,27 +126,6 @@ def Play(target,map_,diff,skin,mods):
         pass
       obj["Time"] /= 0.75
     Start_delay /= 0.75
-  
-  #HR
-  if mods[2] == 1:
-    Mods_Multi *= 1.06
-    AR*=1.4
-    CS*=1.4
-    OD*=1.4
-    if AR>10:
-      AR=10
-    if CS>10:
-      CS=10
-    if OD>10:
-      OD=10
-
-    #EZ
-  if mods[2] == -1:
-    Mods_Multi *= 0.3
-    AR*=0.5
-    CS*=0.5
-    OD*=0.5
-
   #AR display calculations
   if(AR<5):#low ar
     Fade_end = 800+80*(5-AR)
@@ -198,8 +198,6 @@ def Play(target,map_,diff,skin,mods):
   while True:
     #Get time
     Curr_time = pygame.time.get_ticks()
-    if timechart_C != [] and timechart_C[0] != 0:
-      Acc = Acc_Score/(timechart_C[0])/300
     if music == False and Curr_time>=map_start+Start_delay:
       pygame.mixer.music.play()
       music=True
@@ -379,8 +377,59 @@ def Play(target,map_,diff,skin,mods):
         curr_Objects.append((P50,scoreicon[2]))
       elif scoreicon[0]==0:
         curr_Objects.append((Pmiss,scoreicon[2]))
+    for curr_notecount in timechart_C:
+      if(Object_list[curr_notecount]["Type"]=="C")and Curr_time >= timechart[curr_notecount]+map_start+Hit+W50:
+        Score_cache.append((0,timechart[curr_notecount]+map_start+Hit+W50,(Object_list[curr_notecount]["Posx"]-25,Object_list[curr_notecount]["Posy"]-15)))
+        timechart_C.remove(curr_notecount)
+        rating_count[3]+=1
+        Combo=0
+      if Object_list[curr_notecount]["Type"]=="S_head" and Curr_time >= timechart[curr_notecount]+map_start+Hit+W50:
+        Score_cache.append((0,timechart[curr_notecount]+map_start+Hit+W50,(Object_list[curr_notecount]["Posx"]-25,Object_list[curr_notecount]["Posy"]-15)))
+        timechart_C.remove(curr_notecount)
+        try:
+          timechart_C.remove(curr_notecount+1)
+        except:
+          pass
+        rating_count[3]+=1
+        Combo=0
+      if Object_list[curr_notecount]["Type"]=="E":
+        Acc = Acc_Score/(len(timechart)-1)/300
+        pygame.mixer.music.unload()
+        ResultScreen.Render(target,map_,diff,skin,mods,Score,Acc,rating_count,max_combo)
+      if(Curr_time >= timechart[curr_notecount]+map_start+span+Hit and Object_list[curr_notecount]["Type"]=="G"):
+        if spins>span*spinner_req/1000:
+          Score_cache.append((300,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
+          Acc_Score+=300
+          Hitsound.play()
+          timechart_C.remove(curr_notecount)
+          rating_count[0]+=1
+          Combo+=1
+          Acc = Acc_Score/(len(timechart)-1)/300
+        elif spins>span*spinner_req/2000:
+          Score_cache.append((100,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
+          Acc_Score+=100
+          Hitsound.play()
+          timechart_C.remove(curr_notecount)
+          rating_count[1]+=1
+          Combo+=1
+          Acc = Acc_Score/(len(timechart)-1)/300
+        elif spins>1:
+          Score_cache.append((50,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
+          Acc_Score+=50
+          Hitsound.play()
+          timechart_C.remove(curr_notecount)
+          rating_count[2]+=1
+          Combo+=1
+          Acc = Acc_Score/(len(timechart)-1)/300
+        else:
+          Score_cache.append((0,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
+          Acc_Score+=0
+          Hitsound.play()
+          timechart_C.remove(curr_notecount)
+          rating_count[3]+=1
+          Combo=0
+          Acc = Acc_Score/(len(timechart)-1)/300
 
-    #Notes:Future ==>Current
     if(Curr_time >= timechart[timechart_F[0]]+map_start):
       if Object_list[timechart_F[0]]["Type"]=="C":
           timechart_C.append(timechart_F[0])
@@ -398,58 +447,15 @@ def Play(target,map_,diff,skin,mods):
           timechart_C.append(timechart_F[0])
           timechart_F.pop(0)
       elif Object_list[timechart_F[0]]["Type"]=="E":
-          Acc = Acc_Score/(len(timechart)-1)/300
-          pygame.mixer.music.unload()
-          ResultScreen.Render(target,map_,diff,skin,mods,Score,Acc,rating_count,max_combo)
+          timechart_C.append(timechart_F[0])
+          timechart_F.pop(0)
 
+    if timechart_C != [] and timechart_C[0] >= 1:
+      Acc = Acc_Score/(timechart_C[0])/300
+    elif timechart_F != [] and timechart_F[0] != 0:
+      Acc = Acc_Score/(timechart_F[0])/300
 
-    #Notes:Current ==>Past
     for curr_notecount in timechart_C:
-      if(Object_list[curr_notecount]["Type"]=="C")and Curr_time >= timechart[curr_notecount]+map_start+Hit+W50:
-        Score_cache.append((0,timechart[curr_notecount]+map_start+Hit+W50,(Object_list[curr_notecount]["Posx"]-25,Object_list[curr_notecount]["Posy"]-15)))
-        timechart_C.remove(curr_notecount)
-        rating_count[3]+=1
-        Combo=0
-      if Object_list[curr_notecount]["Type"]=="S_head" and Curr_time >= timechart[curr_notecount]+map_start+Hit+W50:
-        Score_cache.append((0,timechart[curr_notecount]+map_start+Hit+W50,(Object_list[curr_notecount]["Posx"]-25,Object_list[curr_notecount]["Posy"]-15)))
-        timechart_C.remove(curr_notecount)
-        try:
-          timechart_C.remove(curr_notecount+1)
-        except:
-          pass
-        rating_count[3]+=1
-        Combo=0
-      if(Curr_time >= timechart[curr_notecount]+map_start+span+Hit and Object_list[curr_notecount]["Type"]=="G"):
-        if spins>span*spinner_req/1000:
-          Score_cache.append((300,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
-          Acc_Score+=300
-          Hitsound.play()
-          timechart_C.remove(curr_notecount)
-          rating_count[0]+=1
-          Combo+=1
-        elif spins>span*spinner_req/2000:
-          Score_cache.append((100,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
-          Acc_Score+=100
-          Hitsound.play()
-          timechart_C.remove(curr_notecount)
-          rating_count[1]+=1
-          Combo+=1
-        elif spins>1:
-          Score_cache.append((50,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
-          Acc_Score+=50
-          Hitsound.play()
-          timechart_C.remove(curr_notecount)
-          rating_count[2]+=1
-          Combo+=1
-        else:
-          Score_cache.append((0,timechart[curr_notecount]+Hit+map_start+span,(515,335)))
-          Acc_Score+=0
-          Hitsound.play()
-          timechart_C.remove(curr_notecount)
-          rating_count[3]+=1
-          Combo=0
-    for curr_notecount in timechart_C:
-
         #Circle
       if Object_list[curr_notecount]["Type"]=="C":
           Posx = Object_list[curr_notecount]["Posx"]
@@ -461,8 +467,8 @@ def Play(target,map_,diff,skin,mods):
             if(approach_circle_size>0):
               Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
               pygame.transform.scale(Approach_circle_original,(approach_circle_size,approach_circle_size),dest_surface=Approach_circle)
+              curr_Objects.append((Approach_circle,Utilities.center(Posx,Posy,approach_circle_size,approach_circle_size)))
             curr_Objects.append((Hit_circle,Utilities.center(Posx,Posy,2*R,2*R)))
-            curr_Objects.append((Approach_circle,Utilities.center(Posx,Posy,approach_circle_size,approach_circle_size)))
             #2.Full opacity
 
           if(Curr_time-timechart[curr_notecount]-map_start>Fade_end and Curr_time-timechart[curr_notecount]-map_start)<(Hit+W50):
@@ -471,10 +477,8 @@ def Play(target,map_,diff,skin,mods):
             if(approach_circle_size>0):
               Approach_circle = pygame.Surface((approach_circle_size,approach_circle_size)).convert_alpha()
               pygame.transform.scale(Approach_circle_original,(approach_circle_size,approach_circle_size),dest_surface=Approach_circle)
+              curr_Objects.append((Approach_circle,Utilities.center(Posx,Posy,approach_circle_size,approach_circle_size)))
             curr_Objects.append((Hit_circle,Utilities.center(Posx,Posy,2*R,2*R)))
-            curr_Objects.append((Approach_circle,Utilities.center(Posx,Posy,approach_circle_size,approach_circle_size)))
-
-
       #Slider head
       if Object_list[curr_notecount]["Type"]=="S_head":
         Posx = Object_list[curr_notecount]["Posx"]
@@ -506,6 +510,7 @@ def Play(target,map_,diff,skin,mods):
       #Spinner
       if Object_list[curr_notecount]["Type"]=="G":
         curr_Objects.append((Spinner,(290,110)))
+
     #Mouse cursor
     Mouse_pos = pygame.mouse.get_pos()
     curr_Objects.append((Cursor,Utilities.center(Mouse_pos[0],Mouse_pos[1],50,50)))
