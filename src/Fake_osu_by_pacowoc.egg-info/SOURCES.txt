@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/Fake_osu_by_pacowoc.egg-info/PKG-INFO
+src/Fake_osu_by_pacowoc.egg-info/SOURCES.txt
+src/Fake_osu_by_pacowoc.egg-info/dependency_links.txt
+src/Fake_osu_by_pacowoc.egg-info/top_level.txt
