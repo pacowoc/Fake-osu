@@ -2,6 +2,7 @@ import pygame,sys
 import Utilities
 import math
 from pygame.locals import *
+import Text
 
 FONT = "fonts\\Aller_Lt.ttf"
 WHITE = (255,255,255)
@@ -42,6 +43,15 @@ def Render(target,map_,diff,skin,mods,score,acc,rating_count,max_combo):
         rank = "C"
     else:
         rank = "D"
+    MaxCombo_text = Text.Text(FONT,30,WHITE)
+    Acc_text = Text.Text(FONT,30,WHITE)
+    Score_text = Text.Text(FONT,50,WHITE)
+    Rating_text_300 = Text.Text(FONT,50,WHITE)
+    Rating_text_100 = Text.Text(FONT,50,WHITE)
+    Rating_text_50 = Text.Text(FONT,50,WHITE)
+    Rating_text_0 = Text.Text(FONT,50,WHITE)
+    Topic_text = Text.Text(FONT,35,WHITE)
+    
     while True:
         for event in pygame.event.get():
             if (event.type == QUIT):
@@ -51,50 +61,37 @@ def Render(target,map_,diff,skin,mods,score,acc,rating_count,max_combo):
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-        curr_Objects = []
-        curr_Objects.append((Background,(0,0)))
-        curr_Objects.append((GUI,(0,0)))
+        Curr_Objects = []
+        Curr_Objects.append((Background,(0,0)))
+        Curr_Objects.append((GUI,(0,0)))
         if do_FC:
-            curr_Objects.append((FC,(400,507)))
-        curr_Objects.append((Rank_texture[rank],(576,47)))
+            Curr_Objects.append((FC,(400,507)))
+        Curr_Objects.append((Rank_texture[rank],(576,47)))
 
-        MComboText = Utilities.render_text("Max combo:"+str(max_combo)+"x",FONT,30,WHITE)
-        curr_Objects.append((MComboText[0],(100,527)))
-        Acc_text = Utilities.render_text("Accuracy: "+str(math.ceil(acc*10000)/100)+"%",FONT,30,WHITE)
-        curr_Objects.append((Acc_text[0],(100,433)))
+        Acc_text.render_tlcorner(Curr_Objects,"Accurracy:"+str(math.ceil(acc*10000)/100)+"%",100,433)
+        MaxCombo_text.render_tlcorner(Curr_Objects,"Max combo:"+str(max_combo)+"x",100,527)
+        Score_text.render_tlcorner(Curr_Objects,"Score:"+str(math.ceil(score)),100,329)
+        Rating_text_300.render_center(Curr_Objects,str(rating_count["300"]),230,145)
+        Rating_text_100.render_center(Curr_Objects,str(rating_count["100"]),456,145)
+        Rating_text_50.render_center(Curr_Objects,str(rating_count["50"]),230,252)
+        Rating_text_0.render_center(Curr_Objects,str(rating_count["0"]),456,252)
+        Topic_text.render_tlcorner(Curr_Objects,map_+"["+diff+"]",10,10)
 
-        Score_text = Utilities.render_text("Score:"+str(math.ceil(score)),FONT,50,WHITE)
-        curr_Objects.append((Score_text[0],(100,329)))
-
-        Rating_text_300 = Utilities.render_text(str(rating_count[0]),FONT,50,WHITE)
-        curr_Objects.append((Rating_text_300[0],Utilities.center(230,145,Rating_text_300[1],90)))
-
-        Rating_text_100 = Utilities.render_text(str(rating_count[1]),FONT,50,WHITE)
-        curr_Objects.append((Rating_text_100[0],Utilities.center(456,145,Rating_text_100[1],90)))
-
-        Rating_text_50 = Utilities.render_text(str(rating_count[2]),FONT,50,WHITE)
-        curr_Objects.append((Rating_text_50[0],Utilities.center(230,252,Rating_text_50[1],90)))
-
-        Rating_text_0 = Utilities.render_text(str(rating_count[3]),FONT,50,WHITE)
-        curr_Objects.append((Rating_text_0[0],Utilities.center(456,252,Rating_text_0[1],90)))
-
-        Topic_text = Utilities.render_text(map_+"["+diff+"]",FONT,35,WHITE)
-        curr_Objects.append((Topic_text[0],(10,10)))
         mod_count = 0
         if mods[2] == -1:
-            curr_Objects.append((EZ,(576+80*mod_count,397)))
+            Curr_Objects.append((EZ,(576+80*mod_count,397)))
             mod_count+=1
         if mods[1] == -1:
-            curr_Objects.append((HT,(576+80*mod_count,397)))
+            Curr_Objects.append((HT,(576+80*mod_count,397)))
             mod_count+=1
         if mods[1] == 1:
-            curr_Objects.append((DT,(576+80*mod_count,397)))
+            Curr_Objects.append((DT,(576+80*mod_count,397)))
             mod_count+=1
         if mods[2]== 1:
-            curr_Objects.append((HR,(576+80*mod_count,397)))
+            Curr_Objects.append((HR,(576+80*mod_count,397)))
             mod_count+=1
 
 
         Mouse_pos = pygame.mouse.get_pos()
-        curr_Objects.append((Cursor,Utilities.center(Mouse_pos[0],Mouse_pos[1],50,50)))
-        Utilities.render(target,curr_Objects)
+        Curr_Objects.append((Cursor,Utilities.center(Mouse_pos[0],Mouse_pos[1],50,50)))
+        Utilities.render(target,Curr_Objects)

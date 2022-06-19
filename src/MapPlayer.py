@@ -1,9 +1,8 @@
-from tkinter import E
 import pygame,sys
 from pygame.locals import *
 import json
 import math
-import Utilities
+import Utilities 
 import ResultScreen
 import Gameplay.Circle as Circle
 import Gameplay.Slider as Slider
@@ -18,7 +17,7 @@ GRAY = (120,120,120)
 TRANSPARENT = (0,0,0,0)
 FONT = "fonts\\Aller_Lt.ttf"
 
-DEBUG_MODE= False
+DEBUG_MODE= True
 def Play(target,map_,diff,skin,mods):
   #Load text objects
   Spin_text = Text.Text(FONT,80,GRAY)
@@ -412,15 +411,14 @@ def Play(target,map_,diff,skin,mods):
 
 
     #Score counter
-    Score_text.render_corner(Curr_Objects,str(math.ceil(Score)),1080-Score_text.get_size_x(str(Score))-30,30)
+    Score_text.render_trcorner(Curr_Objects,str(math.ceil(Score)),1050,30)
     #Combo counter
-    Combo_text.render_corner(Curr_Objects,str(Combo)+"x",50,720-Combo_text.get_size_y(str(Combo)+"x"))
+    Combo_text.render_blcorner(Curr_Objects,str(Combo)+"x",50,690)
     #Acc counter
-    Acc_text.render_corner(Curr_Objects,str(math.ceil(Acc*10000)/100)+"%",1080-Acc_text.get_size_x(str(math.ceil(Acc*10000)/100)+"%"),
-              30+Score_text.get_size_y(Score))
+    Acc_text.render_trcorner(Curr_Objects,str(math.ceil(Acc*10000)/100)+"%",1050,30+Score_text.get_size_y(Score))
     #FPS counter
     if DEBUG_MODE:
-      FPS_text.render_corner(Curr_Objects,str(FPS),0,30)
+      FPS_text.render_tlcorner(Curr_Objects,str(int(FPS)),0,30)
     #Mouse cursor
     Curr_Objects.append((Cursor,Utilities.center(MousePosX,MousePosY,50,50)))
     if Combo>Max_Combo:

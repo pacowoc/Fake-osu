@@ -1,2 +1,2 @@
 # Fake-osu!
-just osu but worse
+Don't READ-ME pls!

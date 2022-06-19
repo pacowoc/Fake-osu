@@ -11,7 +11,7 @@ class Spinner():
         print(str((self.Spins,self.Req)))
         if self.Spins>=self.Req:
             return 300
-        elif self.Spins>=self.Req:
+        elif self.Spins>=self.Req/2:
             return 100
         elif self.Spins>=1:
             return 50
