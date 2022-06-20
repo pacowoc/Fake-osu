@@ -15,7 +15,7 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 GRAY = (120,120,120)
 TRANSPARENT = (0,0,0,0)
-FONT = "fonts\\Aller_Lt.ttf"
+FONT = "fonts/Aller_Lt.ttf"
 
 DEBUG_MODE= True
 def Play(target,map_,diff,skin,mods):
@@ -29,28 +29,29 @@ def Play(target,map_,diff,skin,mods):
 
   ##LOAD TEXTURES AND MAP
 
-  Hit_circle_original=pygame.image.load("skins\\"+skin+"\\circle.png").convert_alpha()
-  Approach_circle_original=pygame.image.load("skins\\"+skin+"\\approach_circle.png").convert_alpha()
-  Cursor=pygame.image.load("skins\\"+skin+"\\cursor.png").convert_alpha()
-  P300=pygame.image.load("skins\\"+skin+"\\300.png").convert_alpha()
-  P100=pygame.image.load("skins\\"+skin+"\\100.png").convert_alpha()
-  P50=pygame.image.load("skins\\"+skin+"\\50.png").convert_alpha()
-  Pmiss=pygame.image.load("skins\\"+skin+"\\0.png").convert_alpha()
-  Slider_body_original=pygame.image.load("skins\\"+skin+"\\slider_body.png").convert_alpha()
-  Spinner_original=pygame.image.load("skins\\"+skin+"\\spinner.png").convert_alpha()
+  Hit_circle_original=pygame.image.load("skins/"+skin+"/circle.png").convert_alpha()
+  Approach_circle_original=pygame.image.load("skins/"+skin+"/approach_circle.png").convert_alpha()
+  Cursor=pygame.image.load("skins/"+skin+"/cursor.png").convert_alpha()
+  P300=pygame.image.load("skins/"+skin+"/300.png").convert_alpha()
+  P100=pygame.image.load("skins/"+skin+"/100.png").convert_alpha()
+  P50=pygame.image.load("skins/"+skin+"/50.png").convert_alpha()
+  Pmiss=pygame.image.load("skins/"+skin+"/0.png").convert_alpha()
+  Slider_body_original=pygame.image.load("skins/"+skin+"/slider_body.png").convert_alpha()
+  Spinner_original=pygame.image.load("skins/"+skin+"/spinner.png").convert_alpha()
+  Flashlight_filter = pygame.image.load("skins/"+skin+"/flashlight_filter.png").convert_alpha()
 
-  Hitsound=pygame.mixer.Sound("skins\\"+skin+"\\hitsound.ogg")
-  Bonus=pygame.mixer.Sound("skins\\"+skin+"\\spinnerbonus.wav")
-  content = json.load(open('maps\\'+map_+"\\"+diff+'\\map.json'))
+  Hitsound=pygame.mixer.Sound("skins/"+skin+"/hitsound.ogg")
+  Bonus=pygame.mixer.Sound("skins/"+skin+"/spinnerbonus.wav")
+  content = json.load(open('maps/'+map_+"/maps/"+diff+'/map.json'))
   try:
     if mods[1] == 1:  
-      pygame.mixer.music.load("maps\\"+map_+"\\music_dt.wav")
-    elif mods[1] == -1:
-      pygame.mixer.music.load("maps\\"+map_+"\\music_ht.wav")
+      pygame.mixer.music.load("maps/"+map_+"/music_dt.wav")
+    elif mods[1] == 2:
+      pygame.mixer.music.load("maps/"+map_+"/music_ht.wav")
     else:
-      pygame.mixer.music.load("maps\\"+map_+"\\music.wav")
+      pygame.mixer.music.load("maps/"+map_+"/music.wav")
   except:
-    pygame.mixer.music.load("skins\\"+skin+"\\failsave.mp3")
+    pygame.mixer.music.load("skins/"+skin+"/failsave.mp3")
   #Extract content
 
   AR = content["Info"]["AR"]
@@ -77,7 +78,7 @@ def Play(target,map_,diff,skin,mods):
       OD=10
 
   #EZ
-  if mods[2] == -1:
+  if mods[2] == 2:
     Mods_Multi *= 0.5
     AR*=0.5
     CS*=0.5
@@ -103,7 +104,7 @@ def Play(target,map_,diff,skin,mods):
     Start_delay /= 1.5
 
   #HT
-  if mods[1] == -1:
+  if mods[1] == 2:
     Mods_Multi*=0.3
     #LOW AR --> LOW AR
     if AR<=5:
@@ -162,7 +163,7 @@ def Play(target,map_,diff,skin,mods):
   notechart_C=[]
   for obj in Object_list:
     if obj["Type"]=="C":
-      notechart_F.append(Circle.Circle(obj["Posx"],obj["Posy"],Radius,obj["Time"],Delta))
+      notechart_F.append(Circle.Circle(obj["Posx"],obj["Posy"],Radius,obj["Time"],Delta,Hit_circle))
     if obj["Type"]=="S":
       notechart_F.append(Slider.Slider(obj["Posx"],obj["Posy"],Radius,obj["Time"],obj["Span"],Delta))
     if obj["Type"]=="G":
@@ -172,11 +173,9 @@ def Play(target,map_,diff,skin,mods):
   
   # initialize
   Map_start = pygame.time.get_ticks()
-  pygame.key.set_repeat(0)
-  pygame.mouse.set_visible(0)
+  pygame.key.set_repeat()
   Score = 0
   Acc_Score = 0
-  pygame.key.set_repeat()
   Acc = 0
   Combo = 0
   Acc_Divider = 0
@@ -291,9 +290,10 @@ def Play(target,map_,diff,skin,mods):
             if note.Spins>note.Req:
               Score+=1000
               Bonus.play()
-              Spin_text.render_center(Curr_Objects,str(1000*math.floor(note.Spins-note.Req)),540,450)
             else:
               Score+=100
+          if note.Spins>note.Req:
+            Spin_text.render_center(Curr_Objects,str(1000*math.ceil(note.Spins-note.Req)),540,450)
 
     #Neither Z nor X is pressed
     if pygame.key.get_pressed()[K_z]==False and pygame.key.get_pressed()[K_x]==False:
@@ -344,7 +344,6 @@ def Play(target,map_,diff,skin,mods):
     for note in notechart_C:
       #Misses by running out of time
       if type(note) is Circle.Circle and Curr_Time >= note.Time+W50:
-        print(str((Curr_Time,note.Time+W50)))
         Score_cache.append((0,Curr_Time,(note.Posx-25,note.Posy-15)))
         notechart_C.remove(note)
         Rating_Count["0"]+=1
@@ -390,8 +389,11 @@ def Play(target,map_,diff,skin,mods):
     for note in notechart_C:
       #Circle
       if type(note) is Circle.Circle:
-        note.render_ac(Curr_Objects,Approach_circle_original,Curr_Time)
-        note.render_hc(Curr_Objects,Hit_circle,Curr_Time)
+        if mods[0] == 1: #HD
+          note.render_hc_hd(Curr_Objects,Curr_Time)
+        else:
+          note.render_ac(Curr_Objects,Approach_circle_original,Curr_Time)
+          note.render_hc(Curr_Objects,Curr_Time)
       if type(note) is Slider.Slider:
         #Slider body
         note.render_body(Curr_Objects,Slider_body)
@@ -408,8 +410,9 @@ def Play(target,map_,diff,skin,mods):
       #Spinner
       if type(note) is Spinner.Spinner:
         Curr_Objects.append((Spinner_original,(290,110)))
-
-
+    #FL
+    if mods[3] == 1:
+      Curr_Objects.append((Flashlight_filter,(MousePosX-1080,MousePosY-1080)))
     #Score counter
     Score_text.render_trcorner(Curr_Objects,str(math.ceil(Score)),1050,30)
     #Combo counter
