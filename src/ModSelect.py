@@ -30,6 +30,7 @@ def Render(target,map_,skin):
     except:
         Background=pygame.Surface((1080,720))
         Background.fill(WHITE) 
+    Background.set_alpha(100)
     HR = pygame.image.load("skins/"+skin+"/hr.png").convert_alpha()
     EZ = pygame.image.load("skins/"+skin+"/ez.png").convert_alpha()
     DT = pygame.image.load("skins/"+skin+"/dt.png").convert_alpha()

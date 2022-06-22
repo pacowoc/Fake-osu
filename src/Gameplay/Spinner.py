@@ -8,7 +8,6 @@ class Spinner():
         self.Quadrants = [0,0,0,0]
         self.Spins = 0
     def End(self):
-        print(str((self.Spins,self.Req)))
         if self.Spins>=self.Req:
             return 300
         elif self.Spins>=self.Req/2:

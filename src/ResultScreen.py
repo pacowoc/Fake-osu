@@ -46,6 +46,7 @@ def Render(target,map_,diff,skin,mods,score,acc,rating_count,max_combo):
     except:
         Background=pygame.Surface((1080,720))
         Background.fill(WHITE)
+    Background.set_alpha(100)
     do_FC=False
     map_combo=rating_count["300"]+rating_count["100"]+rating_count["50"]+rating_count["0"]
     if max_combo == map_combo:

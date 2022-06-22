@@ -65,6 +65,10 @@ def Play(target,map_,diff,skin,mods):
   Mods_Multi = 1
   
   #HR
+  if mods[0] == 1:
+    Mods_Multi*=1.06
+  if mods[3] == 1:
+    Mods_Multi*=1.12
   if mods[2] == 1:
     Mods_Multi *= 1.06
     AR*=1.4
@@ -398,7 +402,8 @@ def Play(target,map_,diff,skin,mods):
         #Slider body
         note.render_body(Curr_Objects,Slider_body)
         #Slider head
-        note.render_head_ac(Curr_Objects,Approach_circle_original,Curr_Time)
+        if mods[0] == 0:
+          note.render_head_ac(Curr_Objects,Approach_circle_original,Curr_Time)
         note.render_head_hc(Curr_Objects,Hit_circle)
         #Slider ball
         if 0<(Curr_Time-note.Time)/note.Span<1:
