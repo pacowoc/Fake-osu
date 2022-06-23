@@ -1,8 +1,6 @@
 import pygame
 import Menu
 
-MAP_NAME = "Example"
-MAP_DIFF = "Normal"
 SKIN_NAME = "test"
 
 

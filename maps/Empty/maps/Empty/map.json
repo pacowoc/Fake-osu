@@ -9,10 +9,6 @@
 	},
 	"Objects":[
 		{
-			"Type":"C",
-			"Time":2000
-		},
-		{
 			"Type":"E",
 			"Time":3500
 		}
