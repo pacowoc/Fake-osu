@@ -1,6 +1,5 @@
 
 import math
-from msilib.schema import Font
 import pygame
 import sys
 import os
@@ -12,36 +11,38 @@ import MapPlayer
 import Utilities
 import Text
 
-FONT = "fonts/Aller_Lt.ttf"
+PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FONT = PATH + "/fonts/Aller_Lt.ttf"
 WHITE = (255,255,255)
+
 
 def Render(target,map_,skin):
     Cursor=pygame.image.load("skins/"+skin+"/cursor.png").convert_alpha()
     Mods = [0,0,0,0]
-    Diff_list = list(os.listdir("C:\Fake osu!\Fake osu!\maps\\"+ map_ +"\\maps"))
-    Diff_list = sorted(Diff_list, key=lambda diff:json.load(open("maps/"+map_+"/maps/"+diff+"/map.json"))["Info"]["Order"]) 
+    Diff_list = list(os.listdir(PATH+"/maps/"+ map_ +"/maps"))
+    Diff_list = sorted(Diff_list, key=lambda diff:json.load(open(PATH+"/maps/"+map_+"/maps/"+diff+"/map.json"))["Info"]["Order"]) 
     SelectedIndex = 0
     Diff = Diff_list[SelectedIndex%len(Diff_list)]  
     LeaderBoard_dict = {} 
     for x in Diff_list:
-        LeaderBoard_dict[x] = sorted(list(json.load(open('maps/'+map_+"/maps/"+x+'/local_leaderboard.json'))["Contents"]), key= lambda a:a['Score'],reverse=True)
+        LeaderBoard_dict[x] = sorted(list(json.load(open(PATH+'/maps/'+map_+"/maps/"+x+'/local_leaderboard.json'))["Contents"]), key= lambda a:a['Score'],reverse=True)
     try:
-        Background=pygame.image.load("maps/"+map_+"/background.png").convert_alpha()
+        Background=pygame.image.load(PATH+"/maps/"+map_+"/background.png").convert_alpha()
     except:
         Background=pygame.Surface((1080,720))
         Background.fill(WHITE) 
     Background.set_alpha(100)
-    HR = pygame.image.load("skins/"+skin+"/hr.png").convert_alpha()
-    EZ = pygame.image.load("skins/"+skin+"/ez.png").convert_alpha()
-    DT = pygame.image.load("skins/"+skin+"/dt.png").convert_alpha()
-    HT = pygame.image.load("skins/"+skin+"/ht.png").convert_alpha()
-    HD = pygame.image.load("skins/"+skin+"/hd.png").convert_alpha()
-    FL = pygame.image.load("skins/"+skin+"/fl.png").convert_alpha()
-    NM = pygame.image.load("skins/"+skin+"/nm.png").convert_alpha()
-    BackButton=pygame.image.load("skins/"+skin+"/back.png").convert_alpha()
-    BackButtonH=pygame.image.load("skins/"+skin+"/back_selected.png").convert_alpha()
-    PlayButton=pygame.image.load("skins/"+skin+"/play.png").convert_alpha()
-    PlayButtonH=pygame.image.load("skins/"+skin+"/play_selected.png").convert_alpha()
+    HR = pygame.image.load(PATH+"/skins/"+skin+"/hr.png").convert_alpha()
+    EZ = pygame.image.load(PATH+"/skins/"+skin+"/ez.png").convert_alpha()
+    DT = pygame.image.load(PATH+"/skins/"+skin+"/dt.png").convert_alpha()
+    HT = pygame.image.load(PATH+"/skins/"+skin+"/ht.png").convert_alpha()
+    HD = pygame.image.load(PATH+"/skins/"+skin+"/hd.png").convert_alpha()
+    FL = pygame.image.load(PATH+"/skins/"+skin+"/fl.png").convert_alpha()
+    NM = pygame.image.load(PATH+"/skins/"+skin+"/nm.png").convert_alpha()
+    BackButton=pygame.image.load(PATH+"/skins/"+skin+"/back.png").convert_alpha()
+    BackButtonH=pygame.image.load(PATH+"/skins/"+skin+"/back_selected.png").convert_alpha()
+    PlayButton=pygame.image.load(PATH+"/skins/"+skin+"/play.png").convert_alpha()
+    PlayButtonH=pygame.image.load(PATH+"/skins/"+skin+"/play_selected.png").convert_alpha()
 
     Back_button = Button.ClickButton(BackButton,BackButtonH,140,640)
     Play_button = Button.ClickButton(PlayButton,PlayButtonH,940,640)
@@ -50,28 +51,28 @@ def Render(target,map_,skin):
     HR_button = Button.ToggleButton([NM,HR,EZ],878,508)
     FL_button = Button.ToggleButton([NM,FL],1003,508)
     SS = pygame.Surface((90,90)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/SS.png").convert_alpha(),(90,90),SS)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/SS.png").convert_alpha(),(90,90),SS)
     SS_HD = pygame.Surface((90,90)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/SS_hd.png").convert_alpha(),(90,90),SS_HD)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/SS_hd.png").convert_alpha(),(90,90),SS_HD)
     S = pygame.Surface((90,90)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/S.png").convert_alpha(),(90,90),S)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/S.png").convert_alpha(),(90,90),S)
     S_HD = pygame.Surface((90,90)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/S_hd.png").convert_alpha(),(90,90),S_HD)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/S_hd.png").convert_alpha(),(90,90),S_HD)
     A = pygame.Surface((90,90)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/A.png").convert_alpha(),(90,90),A)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/A.png").convert_alpha(),(90,90),A)
     B = pygame.Surface((90,90)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/B.png").convert_alpha(),(90,90),B)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/B.png").convert_alpha(),(90,90),B)
     C = pygame.Surface((90,90)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/C.png").convert_alpha(),(90,90),C)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/C.png").convert_alpha(),(90,90),C)
     D = pygame.Surface((90,90)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/D.png").convert_alpha(),(90,90),D)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/D.png").convert_alpha(),(90,90),D)
     DiffSelect = pygame.Surface((500,80)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/mapselect.png").convert_alpha(),(500,80),DiffSelect)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/mapselect.png").convert_alpha(),(500,80),DiffSelect)
     DiffselectH = pygame.Surface((500,80)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/mapselect_selected.png").convert_alpha(),(500,80),DiffselectH)
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/mapselect_selected.png").convert_alpha(),(500,80),DiffselectH)
     LeaderBoard = pygame.Surface((400,85)).convert_alpha()
-    pygame.transform.scale(pygame.image.load("skins/"+skin+"/mapselect.png").convert_alpha(),(400,85),LeaderBoard)
-    Overlay = pygame.image.load("skins/"+skin+"/modselect_overlay.png").convert_alpha()
+    pygame.transform.scale(pygame.image.load(PATH+"/skins/"+skin+"/mapselect.png").convert_alpha(),(400,85),LeaderBoard)
+    Overlay = pygame.image.load(PATH+"/skins/"+skin+"/modselect_overlay.png").convert_alpha()
     Diff_text = (Text.Text(FONT,40,WHITE),
                 Text.Text(FONT,40,WHITE),
                 Text.Text(FONT,40,WHITE),
@@ -101,7 +102,7 @@ def Render(target,map_,skin):
     AR_OD_text = Text.Text(FONT,30,WHITE)
     CS_L_text = Text.Text(FONT,30,WHITE)
 
-    content = json.load(open('maps/'+map_+"/maps/"+Diff+'/map.json'))
+    content = json.load(open(PATH+'/maps/'+map_+"/maps/"+Diff+'/map.json'))
     while True:
         Mouse_pos = pygame.mouse.get_pos()
         Curr_Objects = [(Background,(0,0))]

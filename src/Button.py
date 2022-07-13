@@ -6,6 +6,7 @@ class ClickButton():
         self.image_overlayed = image_overlayed
         self.rect = self.image.get_rect()
         self.rect.center = (posx,posy)
+
     def get_overlay(self,Mposx,Mposy):
         return self.rect.collidepoint(Mposx,Mposy)
     

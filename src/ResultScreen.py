@@ -1,4 +1,5 @@
 
+import os
 import pygame,sys
 import Utilities
 import math
@@ -9,40 +10,41 @@ import Button
 import Menu
 import MapPlayer
 
-FONT = "fonts/Aller_Lt.ttf"
+PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FONT = PATH + "/fonts/Aller_Lt.ttf"
 WHITE = (255,255,255)
 
 def Render(target,map_,diff,skin,mods,score,acc,rating_count,max_combo):
-    Local_leaderboard = json.load(open('maps/'+map_+"/maps/"+diff+'/local_leaderboard.json'))
+    Local_leaderboard = json.load(open( PATH + '/maps/'+map_+"/maps/"+diff+'/local_leaderboard.json'))
     Rank_texture={}
     if mods[0] == 1 or mods[3]==1: #HD OR FL
-        Rank_texture["SS"]=pygame.image.load("skins/"+skin+"/SS_hd.png").convert_alpha()
-        Rank_texture["S"]=pygame.image.load("skins/"+skin+"/S_hd.png").convert_alpha()
+        Rank_texture["SS"]=pygame.image.load( PATH + "/skins/"+skin+"/SS_hd.png").convert_alpha()
+        Rank_texture["S"]=pygame.image.load( PATH + "/skins/"+skin+"/S_hd.png").convert_alpha()
     else:
-        Rank_texture["SS"]=pygame.image.load("skins/"+skin+"/SS.png").convert_alpha()
-        Rank_texture["S"]=pygame.image.load("skins/"+skin+"/S.png").convert_alpha()
-    Rank_texture["A"]=pygame.image.load("skins/"+skin+"/A.png").convert_alpha()
-    Rank_texture["B"]=pygame.image.load("skins/"+skin+"/B.png").convert_alpha()
-    Rank_texture["C"]=pygame.image.load("skins/"+skin+"/C.png").convert_alpha()
-    Rank_texture["D"]=pygame.image.load("skins/"+skin+"/D.png").convert_alpha()
-    Cursor=pygame.image.load("skins/"+skin+"/cursor.png").convert_alpha()
-    GUI=pygame.image.load("skins/"+skin+"/result_screen.png").convert_alpha()
-    FC=pygame.image.load("skins/"+skin+"/FC.png").convert_alpha()
-    HR = pygame.image.load("skins/"+skin+"/hr.png").convert_alpha()
-    EZ = pygame.image.load("skins/"+skin+"/ez.png").convert_alpha()
-    DT = pygame.image.load("skins/"+skin+"/dt.png").convert_alpha()
-    HT = pygame.image.load("skins/"+skin+"/ht.png").convert_alpha()
-    HD = pygame.image.load("skins/"+skin+"/hd.png").convert_alpha()
-    FL = pygame.image.load("skins/"+skin+"/fl.png").convert_alpha()
-    BackButton=pygame.image.load("skins/"+skin+"/back.png").convert_alpha()
-    BackButtonH=pygame.image.load("skins/"+skin+"/back_selected.png").convert_alpha()
-    RetryButton=pygame.image.load("skins/"+skin+"/retry.png").convert_alpha()
-    RetryButtonH=pygame.image.load("skins/"+skin+"/retry_selected.png").convert_alpha()
+        Rank_texture["SS"]=pygame.image.load( PATH + "/skins/"+skin+"/SS.png").convert_alpha()
+        Rank_texture["S"]=pygame.image.load( PATH + "/skins/"+skin+"/S.png").convert_alpha()
+    Rank_texture["A"]=pygame.image.load( PATH + "/skins/"+skin+"/A.png").convert_alpha()
+    Rank_texture["B"]=pygame.image.load( PATH + "/skins/"+skin+"/B.png").convert_alpha()
+    Rank_texture["C"]=pygame.image.load( PATH + "/skins/"+skin+"/C.png").convert_alpha()
+    Rank_texture["D"]=pygame.image.load( PATH + "/skins/"+skin+"/D.png").convert_alpha()
+    Cursor=pygame.image.load( PATH + "/skins/"+skin+"/cursor.png").convert_alpha()
+    GUI=pygame.image.load( PATH + "/skins/"+skin+"/result_screen.png").convert_alpha()
+    FC=pygame.image.load( PATH + "/skins/"+skin+"/FC.png").convert_alpha()
+    HR = pygame.image.load( PATH + "/skins/"+skin+"/hr.png").convert_alpha()
+    EZ = pygame.image.load( PATH + "/skins/"+skin+"/ez.png").convert_alpha()
+    DT = pygame.image.load( PATH + "/skins/"+skin+"/dt.png").convert_alpha()
+    HT = pygame.image.load( PATH + "/skins/"+skin+"/ht.png").convert_alpha()
+    HD = pygame.image.load( PATH + "/skins/"+skin+"/hd.png").convert_alpha()
+    FL = pygame.image.load( PATH + "/skins/"+skin+"/fl.png").convert_alpha()
+    BackButton=pygame.image.load( PATH + "/skins/"+skin+"/back.png").convert_alpha()
+    BackButtonH=pygame.image.load( PATH + "/skins/"+skin+"/back_selected.png").convert_alpha()
+    RetryButton=pygame.image.load( PATH + "/skins/"+skin+"/retry.png").convert_alpha()
+    RetryButtonH=pygame.image.load( PATH + "/skins/"+skin+"/retry_selected.png").convert_alpha()
 
     Back_button = Button.ClickButton(BackButton,BackButtonH,140,640)
     Retry_button = Button.ClickButton(RetryButton,RetryButtonH,940,640)
     try:
-        Background=pygame.image.load("maps/"+map_+"/background.png").convert_alpha()
+        Background=pygame.image.load( PATH + "/maps/"+map_+"/background.png").convert_alpha()
     except:
         Background=pygame.Surface((1080,720))
         Background.fill(WHITE)
@@ -79,7 +81,7 @@ def Render(target,map_,diff,skin,mods,score,acc,rating_count,max_combo):
         "Mods":mods,
         "MCombo":max_combo
     })
-    json.dump(Local_leaderboard,open('maps/'+map_+"/maps/"+diff+'/local_leaderboard.json',"w"))
+    json.dump(Local_leaderboard,open( PATH + '/maps/'+map_+"/maps/"+diff+'/local_leaderboard.json',"w"))
     while True:
         Mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():

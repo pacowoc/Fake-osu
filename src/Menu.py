@@ -7,21 +7,23 @@ import json
 import ModSelect
 import Button
 
-FONT = "fonts/Aller_Lt.ttf"
+PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FONT = PATH + "/fonts/Aller_Lt.ttf"
 WHITE = (255,255,255)
+
 
 def Render(target,skin):
     pygame.key.set_repeat(400,100)
-    MapsNameList = sorted(os.listdir("C:\Fake osu!\Fake osu!\maps"))
-    MapSelect = pygame.image.load("skins/"+skin+"/mapselect.png").convert_alpha()
-    MapSelectH = pygame.image.load("skins/"+skin+"/mapselect_selected.png").convert_alpha()
-    Icon = pygame.image.load("skins/"+skin+"/icon.png").convert_alpha()
-    Overlay = pygame.image.load("skins/"+skin+"/menu_overlay.png").convert_alpha()
-    Cursor=pygame.image.load("skins/"+skin+"/cursor.png").convert_alpha()
-    BackButton=pygame.image.load("skins/"+skin+"/back.png").convert_alpha()
-    BackButtonH=pygame.image.load("skins/"+skin+"/back_selected.png").convert_alpha()
-    PlayButton=pygame.image.load("skins/"+skin+"/play.png").convert_alpha()
-    PlayButtonH=pygame.image.load("skins/"+skin+"/play_selected.png").convert_alpha()
+    MapsNameList = sorted(os.listdir(PATH+"/maps")) 
+    MapSelect = pygame.image.load(PATH+"/skins/"+skin+"/mapselect.png").convert_alpha()
+    MapSelectH = pygame.image.load(PATH+"/skins/"+skin+"/mapselect_selected.png").convert_alpha()
+    Icon = pygame.image.load(PATH+"/skins/"+skin+"/icon.png").convert_alpha()
+    Overlay = pygame.image.load(PATH+"/skins/"+skin+"/menu_overlay.png").convert_alpha()
+    Cursor=pygame.image.load(PATH+"/skins/"+skin+"/cursor.png").convert_alpha()
+    BackButton=pygame.image.load(PATH+"/skins/"+skin+"/back.png").convert_alpha()
+    BackButtonH=pygame.image.load(PATH+"/skins/"+skin+"/back_selected.png").convert_alpha()
+    PlayButton=pygame.image.load(PATH+"/skins/"+skin+"/play.png").convert_alpha()
+    PlayButtonH=pygame.image.load(PATH+"/skins/"+skin+"/play_selected.png").convert_alpha()
     BPM = Text.Text(FONT,30,WHITE)
     Musician = Text.Text(FONT,30,WHITE)
     Beatmapper = Text.Text(FONT,30,WHITE)
@@ -37,7 +39,7 @@ def Render(target,skin):
     SelectedIndex = 0
     pygame.event.set_allowed([KEYDOWN,QUIT,MOUSEBUTTONDOWN])
     Background = LoadBackground(MapsNameList,SelectedIndex,skin)
-    Info = json.load(open("maps/"+MapsNameList[SelectedIndex%len(MapsNameList)]+"/Info.json"))["Info"]
+    Info = json.load(open(PATH+"/maps/"+MapsNameList[SelectedIndex%len(MapsNameList)]+"/Info.json"))["Info"]
     while True:
         Curr_time = pygame.time.get_ticks()
         Curr_Objects = []
@@ -54,11 +56,11 @@ def Render(target,skin):
                 if event.key == K_DOWN:
                     SelectedIndex+=1
                     Background = LoadBackground(MapsNameList,SelectedIndex,skin)
-                    Info = json.load(open("maps/"+MapsNameList[SelectedIndex%len(MapsNameList)]+"/Info.json"))["Info"]
+                    Info = json.load(open(PATH+"/maps/"+MapsNameList[SelectedIndex%len(MapsNameList)]+"/Info.json"))["Info"]
                 if event.key == K_UP:
                     SelectedIndex-=1
                     Background = LoadBackground(MapsNameList,SelectedIndex,skin)
-                    Info = json.load(open("maps/"+MapsNameList[SelectedIndex%len(MapsNameList)]+"/Info.json"))["Info"]
+                    Info = json.load(open(PATH+"/maps/"+MapsNameList[SelectedIndex%len(MapsNameList)]+"/Info.json"))["Info"]
                 if event.key == K_RETURN:
                     ModSelect.Render(target,MapsNameList[SelectedIndex%len(MapsNameList)],skin)
 
@@ -93,14 +95,14 @@ def Render(target,skin):
 
 def LoadBackground(list,index,skin):
     try:
-        Background=pygame.image.load("maps/"+list[index%len(list)]+"/background.png").convert_alpha()
+        Background=pygame.image.load(PATH+"/maps/"+list[index%len(list)]+"/background.png").convert_alpha()
     except:
         Background=pygame.Surface((1080,720))
         Background.fill(WHITE)
     try: 
-        pygame.mixer.music.load("maps/"+list[index%len(list)]+"/music.wav")
+        pygame.mixer.music.load(PATH+"/maps/"+list[index%len(list)]+"/music.wav")
     except:
-        pygame.mixer.music.load("skins/"+skin+"/failsave.mp3")
+        pygame.mixer.music.load(PATH+"/skins/"+skin+"/failsave.mp3")
     pygame.mixer.music.play()
     Background.set_alpha(100)
     return Background

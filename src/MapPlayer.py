@@ -1,3 +1,4 @@
+import os
 import pygame,sys
 from pygame.locals import *
 import json
@@ -15,9 +16,10 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 GRAY = (120,120,120)
 TRANSPARENT = (0,0,0,0)
-FONT = "fonts/Aller_Lt.ttf"
+PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FONT = PATH + "/fonts/Aller_Lt.ttf"
 
-DEBUG_MODE= True
+DEBUG_MODE= False
 def Play(target,map_,diff,skin,mods):
   #Load text objects
   Spin_text = Text.Text(FONT,80,GRAY)
@@ -29,29 +31,29 @@ def Play(target,map_,diff,skin,mods):
 
   ##LOAD TEXTURES AND MAP
 
-  Hit_circle_original=pygame.image.load("skins/"+skin+"/circle.png").convert_alpha()
-  Approach_circle_original=pygame.image.load("skins/"+skin+"/approach_circle.png").convert_alpha()
-  Cursor=pygame.image.load("skins/"+skin+"/cursor.png").convert_alpha()
-  P300=pygame.image.load("skins/"+skin+"/300.png").convert_alpha()
-  P100=pygame.image.load("skins/"+skin+"/100.png").convert_alpha()
-  P50=pygame.image.load("skins/"+skin+"/50.png").convert_alpha()
-  Pmiss=pygame.image.load("skins/"+skin+"/0.png").convert_alpha()
-  Slider_body_original=pygame.image.load("skins/"+skin+"/slider_body.png").convert_alpha()
-  Spinner_original=pygame.image.load("skins/"+skin+"/spinner.png").convert_alpha()
-  Flashlight_filter = pygame.image.load("skins/"+skin+"/flashlight_filter.png").convert_alpha()
+  Hit_circle_original=pygame.image.load( PATH +"/skins/"+skin+"/circle.png").convert_alpha()
+  Approach_circle_original=pygame.image.load( PATH +"/skins/"+skin+"/approach_circle.png").convert_alpha()
+  Cursor=pygame.image.load( PATH +"/skins/"+skin+"/cursor.png").convert_alpha()
+  P300=pygame.image.load( PATH +"/skins/"+skin+"/300.png").convert_alpha()
+  P100=pygame.image.load( PATH +"/skins/"+skin+"/100.png").convert_alpha()
+  P50=pygame.image.load( PATH +"/skins/"+skin+"/50.png").convert_alpha()
+  Pmiss=pygame.image.load( PATH +"/skins/"+skin+"/0.png").convert_alpha()
+  Slider_body_original=pygame.image.load( PATH +"/skins/"+skin+"/slider_body.png").convert_alpha()
+  Spinner_original=pygame.image.load( PATH +"/skins/"+skin+"/spinner.png").convert_alpha()
+  Flashlight_filter = pygame.image.load( PATH +"/skins/"+skin+"/flashlight_filter.png").convert_alpha()
 
-  Hitsound=pygame.mixer.Sound("skins/"+skin+"/hitsound.ogg")
-  Bonus=pygame.mixer.Sound("skins/"+skin+"/spinnerbonus.wav")
-  content = json.load(open('maps/'+map_+"/maps/"+diff+'/map.json'))
+  Hitsound=pygame.mixer.Sound( PATH +"/skins/"+skin+"/hitsound.ogg")
+  Bonus=pygame.mixer.Sound( PATH +"/skins/"+skin+"/spinnerbonus.wav")
+  content = json.load(open( PATH +'/maps/'+map_+"/maps/"+diff+'/map.json'))
   try:
     if mods[1] == 1:  
-      pygame.mixer.music.load("maps/"+map_+"/music_dt.wav")
+      pygame.mixer.music.load( PATH +"/maps/"+map_+"/music_dt.wav")
     elif mods[1] == 2:
-      pygame.mixer.music.load("maps/"+map_+"/music_ht.wav")
+      pygame.mixer.music.load( PATH +"/maps/"+map_+"/music_ht.wav")
     else:
-      pygame.mixer.music.load("maps/"+map_+"/music.wav")
+      pygame.mixer.music.load( PATH +"/maps/"+map_+"/music.wav")
   except:
-    pygame.mixer.music.load("skins/"+skin+"/failsave.mp3")
+    pygame.mixer.music.load( PATH +"/skins/"+skin+"/failsave.mp3")
   #Extract content
 
   AR = content["Info"]["AR"]
@@ -325,9 +327,12 @@ def Play(target,map_,diff,skin,mods):
             Combo+=1
             notechart_C.remove(note)
             Score += 300+(300*(Combo-1)*(AR+OD+CS)*Mods_Multi/25)
-            Score += note.Span
-          break
-    
+            if mods[1] == 0:
+              Score += note.Span*Mods_Multi
+            elif mods[1] == 1:
+              Score+= note.Span*1.5*Mods_Multi
+            else:
+              Score+= note.Span*0.75*Mods_Multi
     #Score icon
     for scoreicon in Score_cache:
       if Curr_Time-scoreicon[1] > 500:
