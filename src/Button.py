@@ -17,7 +17,7 @@ class ClickButton():
             target.append((self.image,self.rect.topleft))
 
 class ToggleButton():
-    def __init__(self,images:list[pygame.Surface],posx,posy):
+    def __init__(self,images,posx,posy):
         self.states = len(images)
         self.images = images
         self.rect = images[0].get_rect()
